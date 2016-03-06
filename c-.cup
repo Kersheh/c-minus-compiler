@@ -1,7 +1,8 @@
 /*
-  Created by: Fei Song
-  File Name: tiny.cup
-  To Build: java java_cup.Main < tiny.cup
+  Created by: Matt Breckon and Dean Way
+  File name: c-.cup
+  To build: 
+    $ java java_cup.Main < c-.cup
 */
    
    

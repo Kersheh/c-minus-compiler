@@ -2,8 +2,7 @@ NOTE: Professor's original README found below.
 
 cup.jar is found within the directory /java. Makefile has been modified to 
 account for this. Added /programs folder to hold testing programs. Added test 
-to Makefile to execute all .tiny (to be changed to .cm later) programs found 
-within the /programs folder.
+to Makefile to execute all .cm programs found within the /programs folder.
 
 -------------------------------------------------------------------------------
 

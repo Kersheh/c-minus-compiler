@@ -1,10 +1,9 @@
 /*
-  Created By: Fei Song
-  File Name: tiny.flex
-  To Build: jflex tiny.flex
-
-  and then after the parser is created
-    javac Lexer.java
+  Created by: Matt Breckon and Dean Way
+  File name: c-.flex
+  To build: 
+    $ jflex c-.flex
+    $ javac Lexer.java
 */
    
 /* --------------------------Usercode Section------------------------ */
