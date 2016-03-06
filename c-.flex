@@ -115,8 +115,6 @@ identifier = {letter}+
 /* Other tokens */
 {identifier}       { return symbol(sym.ID, yytext()); }
 {number}           { return symbol(sym.NUM, yytext()); }
-{letter}           { return symbol(sym.LETTER, yytext()); }
-{digit}            { return symbol(sym.DIGIT, yytext()); }
 {WhiteSpace}*      { /* skip whitespace */ }   
 "/*".*"*/"         { /* skip comments */ }
 .                  { return symbol(sym.ERROR); }

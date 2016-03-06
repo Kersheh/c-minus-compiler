@@ -75,7 +75,7 @@ terminal ELSE, IF, INT, RETURN, VOID, WHILE;
 terminal PLUS, MINUS, TIMES, OVER, LT, LTEQ, GT, GTEQ, EQ, NOTEQ, ASSIGN;
 terminal SEMI, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 /* Other tokens */
-terminal String ID, NUM, LETTER, DIGIT;
+terminal String ID, NUM;
 terminal ERROR;
    
 non terminal ExpList program, declar_list, params, param_list, stmt_list, arg_list;
