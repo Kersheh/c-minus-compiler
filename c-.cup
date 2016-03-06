@@ -7,9 +7,7 @@
    
    
 /* ----------------------Preliminary Declarations Section--------------------*/
-   
-/* Import the class java_cup.runtime.*  */
-//import java_cup.runtime.*;
+
 import absyn.*;
    
 /* Parser code to change the way the parser reports errors (include
@@ -80,98 +78,107 @@ terminal SEMI, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 terminal String ID, NUM, LETTER, DIGIT;
 terminal ERROR;
    
-non terminal ExpList program, stmt_seq;
-non terminal Exp stmt, if_stmt, repeat_stmt, assign_stmt, read_stmt, write_stmt;
-non terminal Exp exp, simple_exp, term, factor;   
+non terminal ExpList program, declar_list, params, param_list, stmt_list, arg_list;
+non terminal Exp declar, var_declar, fun_declar, local_declar, type_specifier;
+non terminal Exp param, empty, stmt, exp_stmt, comp_stmt, select_stmt;
+non terminal Exp iter_stmt, return_stmt, exp, simple_exp, add_exp, var;
+non terminal Exp relop, addop, mulop, factor, term, call, args;
 
 /* ----------------------------Grammar Section-------------------- */
    
-program	     ::= stmt_seq:s
-                 {: RESULT = s;
-                    System.out.println( "The abstract syntax tree is:" );
-                    Absyn.showTree( RESULT, 0 );
-                 :}
-               ;
+  program       ::= declar_list
+                  {:
+                    System.out.println("Foobar");
+                  :}
+                ;
 
-stmt_seq     ::= stmt_seq:s1 SEMI stmt:s2 
-                 {: ExpList t = s1;
-                    while( t.tail != null )
-                      t = t.tail;
-                    t.tail = new ExpList(s2, null);
-                    RESULT = s1;
-                 :}
-               | stmt:s
-                 {: RESULT = new ExpList(s, null); :}
-               | error SEMI stmt:s
-                 {: parser.report_error("invalid", null); 
-                    RESULT = new ExpList(s, null); 
-                 :}
-               ;
+/* Example code from professor below */
+// program	     ::= stmt_seq:s
+//                  {: RESULT = s;
+//                     System.out.println( "The abstract syntax tree is:" );
+//                     Absyn.showTree( RESULT, 0 );
+//                  :}
+//                ;
 
-stmt         ::= if_stmt:i
-                 {: RESULT = i; :}
-               | repeat_stmt:r
-                 {: RESULT = r; :}
-               | assign_stmt:a
-                 {: RESULT = a; :}
-               | read_stmt:r
-                 {: RESULT = r; :}
-               | write_stmt:w
-                 {: RESULT = w; :}
-               ;
+// stmt_seq     ::= stmt_seq:s1 SEMI stmt:s2 
+//                  {: ExpList t = s1;
+//                     while( t.tail != null )
+//                       t = t.tail;
+//                     t.tail = new ExpList(s2, null);
+//                     RESULT = s1;
+//                  :}
+//                | stmt:s
+//                  {: RESULT = new ExpList(s, null); :}
+//                | error SEMI stmt:s
+//                  {: parser.report_error("invalid", null); 
+//                     RESULT = new ExpList(s, null); 
+//                  :}
+//                ;
 
-if_stmt      ::= IF:i exp:e THEN stmt_seq:s END
-                 {: RESULT = new IfExp(ileft, e, s, null); :}
-               | IF:i exp:e THEN stmt_seq:s1 ELSE stmt_seq:s2 END
-                 {: RESULT = new IfExp(ileft, e, s1, s2); :}
-               ;
+// stmt         ::= if_stmt:i
+//                  {: RESULT = i; :}
+//                | repeat_stmt:r
+//                  {: RESULT = r; :}
+//                | assign_stmt:a
+//                  {: RESULT = a; :}
+//                | read_stmt:r
+//                  {: RESULT = r; :}
+//                | write_stmt:w
+//                  {: RESULT = w; :}
+//                ;
 
-repeat_stmt  ::= REPEAT:r stmt_seq:s UNTIL exp:e
-                 {: RESULT = new RepeatExp(rleft, s, e); :}
-               ;
+// if_stmt      ::= IF:i exp:e THEN stmt_seq:s END
+//                  {: RESULT = new IfExp(ileft, e, s, null); :}
+//                | IF:i exp:e THEN stmt_seq:s1 ELSE stmt_seq:s2 END
+//                  {: RESULT = new IfExp(ileft, e, s1, s2); :}
+//                ;
 
-assign_stmt  ::= ID:i ASSIGN exp:e
-                 {: RESULT = new AssignExp(ileft, new VarExp(ileft, i), e); :} 
-               ;
+// repeat_stmt  ::= REPEAT:r stmt_seq:s UNTIL exp:e
+//                  {: RESULT = new RepeatExp(rleft, s, e); :}
+//                ;
 
-read_stmt    ::= READ:r ID:i
-                 {: RESULT = new ReadExp(rleft, new VarExp(rleft, i)); :}
-               ;
+// assign_stmt  ::= ID:i ASSIGN exp:e
+//                  {: RESULT = new AssignExp(ileft, new VarExp(ileft, i), e); :} 
+//                ;
 
-write_stmt   ::= WRITE:w exp:e
-                 {: RESULT = new WriteExp(wleft, e); :}
-               ;
+// read_stmt    ::= READ:r ID:i
+//                  {: RESULT = new ReadExp(rleft, new VarExp(rleft, i)); :}
+//                ;
 
-exp          ::= simple_exp:s1 LT simple_exp:s2
-                 {: RESULT = new OpExp(s1left, s1, OpExp.LT, s2); :}
-               | simple_exp:s1 GT simple_exp:s2
-                 {: RESULT = new OpExp(s1left, s1, OpExp.GT, s2); :}
-               | simple_exp:s1 EQ simple_exp:s2
-                 {: RESULT = new OpExp(s1left, s1, OpExp.EQ, s2); :}
-               | simple_exp:s
-                 {: RESULT = s; :}
-               ;
+// write_stmt   ::= WRITE:w exp:e
+//                  {: RESULT = new WriteExp(wleft, e); :}
+//                ;
 
-simple_exp   ::= simple_exp:s PLUS term:t
-                 {: RESULT = new OpExp(sleft, s, OpExp.PLUS, t); :}
-               | simple_exp:s MINUS term:t
-                 {: RESULT = new OpExp(sleft, s, OpExp.MINUS, t); :}
-               | term:t
-                 {: RESULT = t; :}
-               ;
+// exp          ::= simple_exp:s1 LT simple_exp:s2
+//                  {: RESULT = new OpExp(s1left, s1, OpExp.LT, s2); :}
+//                | simple_exp:s1 GT simple_exp:s2
+//                  {: RESULT = new OpExp(s1left, s1, OpExp.GT, s2); :}
+//                | simple_exp:s1 EQ simple_exp:s2
+//                  {: RESULT = new OpExp(s1left, s1, OpExp.EQ, s2); :}
+//                | simple_exp:s
+//                  {: RESULT = s; :}
+//                ;
 
-term         ::= term:t TIMES factor:f
-                 {: RESULT = new OpExp(tleft, t, OpExp.TIMES, f); :}
-               | term:t OVER factor:f
-                 {: RESULT = new OpExp(tleft, t, OpExp.OVER, f); :}
-               | factor:f
-                 {: RESULT = f; :}
-               ;
+// simple_exp   ::= simple_exp:s PLUS term:t
+//                  {: RESULT = new OpExp(sleft, s, OpExp.PLUS, t); :}
+//                | simple_exp:s MINUS term:t
+//                  {: RESULT = new OpExp(sleft, s, OpExp.MINUS, t); :}
+//                | term:t
+//                  {: RESULT = t; :}
+//                ;
 
-factor       ::= LPAREN exp:e RPAREN
-                 {: RESULT = e; :}
-               | NUM:n
-                 {: RESULT = new IntExp(nleft, n); :}
-               | ID:i
-                 {: RESULT = new VarExp(ileft, i); :}
-               ;
+// term         ::= term:t TIMES factor:f
+//                  {: RESULT = new OpExp(tleft, t, OpExp.TIMES, f); :}
+//                | term:t OVER factor:f
+//                  {: RESULT = new OpExp(tleft, t, OpExp.OVER, f); :}
+//                | factor:f
+//                  {: RESULT = f; :}
+//                ;
+
+// factor       ::= LPAREN exp:e RPAREN
+//                  {: RESULT = e; :}
+//                | NUM:n
+//                  {: RESULT = new IntExp(nleft, n); :}
+//                | ID:i
+//                  {: RESULT = new VarExp(ileft, i); :}
+//                ;
