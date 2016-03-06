@@ -71,9 +71,13 @@ parser code {:
    
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
    
-terminal IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE;
-terminal ASSIGN, EQ, LT, GT, PLUS, MINUS, TIMES, OVER, LPAREN, RPAREN, SEMI;
-terminal String ID, NUM;
+/* Keywords */
+terminal ELSE, IF, INT, RETURN, VOID, WHILE;
+/* Special symbols */
+terminal PLUS, MINUS, TIMES, OVER, LT, LTEQ, GT, GTEQ, EQ, NOTEQ, ASSIGN;
+terminal SEMI, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
+/* Other tokens */
+terminal String ID, NUM, LETTER, DIGIT;
 terminal ERROR;
    
 non terminal ExpList program, stmt_seq;

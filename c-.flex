@@ -85,33 +85,38 @@ identifier = {letter}+
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */
-   
-/*
-   This section contains regular expressions and actions, i.e. Java
-   code, that will be executed when the scanner matches the associated
-   regular expression. */
-   
-"if"               { return symbol(sym.IF); }
-"then"             { return symbol(sym.THEN); }
+/* Keywords */
 "else"             { return symbol(sym.ELSE); }
-"end"              { return symbol(sym.END); }
-"repeat"           { return symbol(sym.REPEAT); }
-"until"            { return symbol(sym.UNTIL); }
-"read"             { return symbol(sym.READ); }
-"write"            { return symbol(sym.WRITE); }
-":="               { return symbol(sym.ASSIGN); }
-"="                { return symbol(sym.EQ); }
-"<"                { return symbol(sym.LT); }
-">"                { return symbol(sym.GT); }
+"if"               { return symbol(sym.IF); }
+"int"              { return symbol(sym.INT); }
+"return"           { return symbol(sym.RETURN); }
+"void"             { return symbol(sym.VOID); }
+"while"            { return symbol(sym.WHILE); }
+/* Special symbols */
 "+"                { return symbol(sym.PLUS); }
 "-"                { return symbol(sym.MINUS); }
 "*"                { return symbol(sym.TIMES); }
 "/"                { return symbol(sym.OVER); }
+"<"                { return symbol(sym.LT); }
+"<="               { return symbol(sym.LTEQ); }
+">"                { return symbol(sym.GT); }
+">="               { return symbol(sym.GTEQ); }
+"=="               { return symbol(sym.EQ); }
+"!="               { return symbol(sym.NOTEQ); }
+"="                { return symbol(sym.ASSIGN); }
+";"                { return symbol(sym.SEMI); }
+","                { return symbol(sym.COMMA); }
 "("                { return symbol(sym.LPAREN); }
 ")"                { return symbol(sym.RPAREN); }
-";"                { return symbol(sym.SEMI); }
-{number}           { return symbol(sym.NUM, yytext()); }
+"["                { return symbol(sym.LBRACKET); }
+"]"                { return symbol(sym.RBRACKET); }
+"{"                { return symbol(sym.LBRACE); }
+"}"                { return symbol(sym.RBRACE); }
+/* Other tokens */
 {identifier}       { return symbol(sym.ID, yytext()); }
+{number}           { return symbol(sym.NUM, yytext()); }
+{letter}           { return symbol(sym.LETTER, yytext()); }
+{digit}            { return symbol(sym.DIGIT, yytext()); }
 {WhiteSpace}*      { /* skip whitespace */ }   
-"{"[^\}]*"}"       { /* skip comments */ }
+"/*".*"*/"         { /* skip comments */ }
 .                  { return symbol(sym.ERROR); }
