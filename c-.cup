@@ -79,18 +79,356 @@ terminal String ID, NUM;
 terminal ERROR;
    
 non terminal ExpList program, declar_list, params, param_list, stmt_list, arg_list;
-non terminal Exp declar, var_declar, fun_declar, local_declar, type_specifier;
+non terminal Exp declar, var_declar, fun_declar, loc_declar, type;
 non terminal Exp param, empty, stmt, exp_stmt, comp_stmt, select_stmt;
 non terminal Exp iter_stmt, return_stmt, exp, simple_exp, add_exp, var;
 non terminal Exp relop, addop, mulop, factor, term, call, args;
 
 /* ----------------------------Grammar Section-------------------- */
-   
-  program       ::= declar_list
+  
+  // program --> declaration-list
+  program     ::= declar_list:d
                   {:
-                    System.out.println("Foobar");
+                    RESULT = d;
+                    System.out.println("The abstract syntax tree is:");
+                    Absyn.showTree(RESULT, 0);
                   :}
-                ;
+                  ;
+
+  // declaration-list --> declaration-list delcaration | declaration
+  declar_list ::= declar_list:d1 declar:d2
+                  {:
+                    ExpList t = d1
+                    while(t.tail != null)
+                      t = t.tail
+                    t.tail = new ExpList(d2, null);
+                    RESULT = d1;
+                  :}
+                  | declar:d
+                  {:
+                    RESULT = new ExpList(d, null);
+                  :}
+                  ;
+
+  // declaration--> var-delcaration | fun-declaration
+  declar      ::= var_declar:d
+                  {:
+                    //
+                  :}
+                  | fun_declar:d
+                  {:
+                    //
+                  :}
+                  ;
+
+  // var-declaration --> type-specifier ID ; | type-specifier ID [ NUM ] ;
+  var_declar  ::= type:t ID:i SEMI
+                  {:
+                    //
+                  :}
+                  | type:t ID:i RBRACKET NUM:n LBRACKET SEMI
+                  {:
+                    //
+                  :}
+                  ;
+
+  // type-specifier --> int | void
+  type        ::= INT:i
+                  {:
+                    //
+                  :}
+                  | VOID:v
+                  {:
+                    //
+                  :}
+                  ;
+
+  // fun-declaration --> type-specifier ID ( params ) compound-stmt
+  fun_declar  ::= type:t ID:i LPAREN params:p RPAREN comp_stmt:c
+                  {:
+                    //
+                  :}
+                  ;
+
+  // params --> param-list | void
+  params      ::= param_list:p
+                  {:
+                    //
+                  :}
+                  | VOID:v
+                  {:
+                    //
+                  :}
+                  ;
+
+  // param-list --> param-list , param | param
+  param_list  ::= param_list:p1 COMMA param:p2
+                  {:
+                    //
+                  :}
+                  | param:p
+                  {:
+                    //
+                  :}
+                  ;
+
+  // param --> type-specifier ID | type-specifier ID [ ]
+  param       ::= type:t ID:i
+                  {:
+                    //
+                  :}
+                  | type:t ID:i RBRACKET LBRACKET
+                  {:
+                    //
+                  :}
+                  ;
+
+  // compound-stmt --> { local-declarations statement-list }
+  comp_stmt   ::= LBRACE loc_declar:d stmt_list:s RBRACE
+                  {:
+                    //
+                  :}
+                  ;
+
+  // local-declarations --> local-declarations var-declaration | empty
+  loc_declar  ::= loc_declar:d1 var_declar:d2
+                  {:
+                    //
+                  :}
+                  | empty
+                  {:
+                    //
+                  :}
+                  ;
+
+  // statement-list --> statement-list statement | empty
+  stmt_list   ::= stmt_list:s1 stmt:s2
+                  {:
+                    //
+                  :}
+                  | empty
+                  {:
+                    //
+                  :}
+                  ;
+
+  // statement --> expression-stmt | compound-stmt | selection-stmt
+  //               | iteration-stmt | return-stmt
+  stmt        ::= exp_stmt:s
+                  {:
+                    //
+                  :}
+                  | comp_stmt:s
+                  {:
+                    //
+                  :}
+                  | select_stmt:s
+                  {:
+                    //
+                  :}
+                  | iter_stmt:s
+                  {:
+                    //
+                  :}
+                  | return_stmt:s
+                  {:
+                    //
+                  :}
+                  ;
+
+  // expression --> expression ; | ;
+  exp_stmt    ::= exp:e SEMI
+                  {:
+                    //
+                  :}
+                  | SEMI
+                  {:
+                    //
+                  :}
+                  ;
+
+  // selection-stmt --> if ( expression ) statement
+  //                    | if ( expression ) statement else statement
+  select_stmt ::= IF LPAREN exp:e RPAREN stmt:s
+                  {:
+                    //
+                  :}
+                  | IF LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
+                  {:
+                    //
+                  :}
+                  ;
+
+  // iteration-stmt --> while ( expression ) statement
+  iter_stmt   ::= WHILE LPAREN exp:e RPAREN stmt:s
+                  {:
+                    //
+                  :}
+                  ;
+
+  // return-stmt --> return ; | return expression ;
+  return_stmt ::= RETURN SEMI
+                  {:
+                    //
+                  :}
+                  | RETURN exp:e SEMI
+                  {:
+                    //
+                  :}
+                  ;
+
+  // expression --> var = expression | simple-expression
+  exp         ::= var:v ASSIGN exp:e
+                  {:
+                    //
+                  :}
+                  | simple_exp:e
+                  {:
+                    //
+                  :}
+                  ;
+
+  // var --> ID | ID [ expression ]
+  var         ::= ID:i
+                  {:
+                    //
+                  :}
+                  | ID:i LBRACKET exp:e RBRACKET
+                  {:
+                    //
+                  :}
+                  ;
+
+  // simple-expression --> additive-expression relop additive-expression
+  //                       | additive-expression
+  simple_exp  ::= add_exp:e1 relop:o add_exp:e2
+                  {:
+                    //
+                  :}
+                  | add_exp:e
+                  {:
+                    //
+                  :}
+                  ;
+
+  // relop --> <= | < | > | >= | == | !=
+  relop       ::= LTEQ
+                  {:
+                    //
+                  :}
+                  | LT
+                  {:
+                    //
+                  :}
+                  | GT
+                  {:
+                    //
+                  :}
+                  | GTEQ
+                  {:
+                    //
+                  :}
+                  | EQ
+                  {:
+                    //
+                  :}
+                  | NOTEQ
+                  {:
+                    //
+                  :}
+                  ;
+
+  // additive-expression --> additive-expression addop term | term
+  add_exp     ::= add_exp:e addop:o term:t
+                  {:
+                    //
+                  :}
+                  | term:t
+                  {:
+                    //
+                  :}
+                  ;
+
+  // addop --> + | -
+  addop       ::= PLUS
+                  {:
+                    //
+                  :}
+                  | MINUS
+                  {:
+                    //
+                  :}
+                  ;
+
+  // term --> term mulop factor | factor
+  term        ::= term:t mulop:o factor:f
+                  {:
+                    //
+                  :}
+                  | factor:f
+                  {:
+                    //
+                  :}
+                  ;
+
+  // mulop --> * | /
+  mulop       ::= TIMES
+                  {:
+                    //
+                  :}
+                  | OVER
+                  {:
+                    //
+                  :}
+                  ;
+
+  // factor --> ( expression ) | var | call | NUM
+  factor      ::= LPAREN exp:e RPAREN
+                  {:
+                    //
+                  :}
+                  | var:v
+                  {:
+                    //
+                  :}
+                  | call:c
+                  {:
+                    //
+                  :}
+                  | NUM:n
+                  {:
+                    //
+                  :}
+                  ;
+
+  // call --> ID ( args )
+  call        ::= ID:i LPAREN args:a RPAREN
+                  {:
+                    //
+                  :}
+                  ;
+
+  // args --> arg-list | empty
+  args        ::= arg_list:a COMMA exp:e
+                  {:
+                    //
+                  :}
+                  | exp:e
+                  {:
+                    //
+                  :}
+                  ;
+
+  // arg-list --> arg-list , expression | expression
+  arg_list    ::= arg_list:a COMMA exp:e
+                  {:
+                    //
+                  :}
+                  | exp:e
+                  {:
+                    //
+                  :}
+                  ;
 
 /* Example code from professor below */
 // program	     ::= stmt_seq:s
