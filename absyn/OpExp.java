@@ -15,7 +15,7 @@ public class OpExp extends Exp {
   public Exp left;
   public int op;
   public Exp right;
-  public OpExp( int pos, Exp left, int op, Exp right ) {
+  public OpExp(int pos, Exp left, int op, Exp right) {
     this.pos = pos;
     this.left = left;
     this.op = op;
