@@ -1,6 +1,20 @@
 /*
   Created by: Matt Breckon and Dean Way
   File name: 1.cm
-  This sample program compiles without errors.
-  EXPLAIN PROGRAM HERE WHEN DEVELOPED
+  Sample problem contains one function that determines the largest value of
+  three variables, followed by outputing the value.
+  -- This program compiles without errors.
 */
+
+int largest(int a, int b, int c) {
+  int result = a;
+  if(b > result) result = b;
+  if(c > result) result = c;
+  return result;
+}
+
+void main(void) {
+  int x; int y; int z;
+  x = 6; y = 2; z = 13;
+  output(largest(x, y, z));
+}

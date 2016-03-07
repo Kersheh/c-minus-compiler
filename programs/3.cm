@@ -1,6 +1,21 @@
 /*
   Created by: Matt Breckon and Dean Way
   File name: 3.cm
-  This sample program compiles with lexical and/or syntactic errors.
-  EXPLAIN PROGRAM AND ERRORS HERE WHEN DEVELOPED
+  Sample program compares two ints and returns 0 if they are equal, 1 if not.
+  -- This program compiles with lexical and/or syntactic errors.
+  -- Error 1: Relational operator "!==" should be "!=".
+  -- Error 2: Call to output() in main() missing semi colon.
 */
+
+int eq(int a, int b) {
+  if(a !== b) return 1;
+  return 0;
+}
+
+void main(void) {
+  int x; int y; int result;
+  x = 1;
+  y = 1;
+  result = eq(x, y);
+  output(result)
+}

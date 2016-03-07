@@ -1,6 +1,18 @@
 /*
   Created by: Matt Breckon and Dean Way
   File name: 4.cm
-  This sample program compiles with lexical and/or syntactic errors.
-  EXPLAIN PROGRAM AND ERRORS HERE WHEN DEVELOPED
+  Sample program creates int array and adds integers together.
+  -- This program compiles with lexical and/or syntactic errors.
+  -- Error 1: main() function's compound-statement is missing parenthesis.
+  -- Error 2: Array is missing size on declaration.
 */
+
+void main(void)
+  int a[]; int size; int sum; int i;
+  a[0] = 1; a[2] = 2; a[3] = 3;
+  size = 3; sum = 0; i = 0;
+  while(i < size) {
+    sum = sum + a[i];
+    i = i + 1;
+  }
+  output(sum);

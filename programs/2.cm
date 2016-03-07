@@ -1,6 +1,25 @@
 /*
   Created by: Matt Breckon and Dean Way
   File name: 2.cm
-  This sample program compiles with lexical and/or syntactic errors.
-  EXPLAIN PROGRAM AND ERRORS HERE WHEN DEVELOPED
+  Sample program hardcodes an array of size 3 and passes it to a function that
+  prints out each integer.
+  -- This program compiles with lexical and/or syntactic errors.
+  -- Error 1: Third variable "size" on function input is of type void.
+  -- Error 2: main() type declaration is misspelled as "vod"
 */
+
+void print_integers(int a[], int start, void size) {
+  int i;
+  i = start;
+  while(i < size) {
+    output(a[i]);
+    i = i + 1;
+  }
+}
+
+vod main(void) {
+  int a[3]; int i;
+  a[0] = 10; a[1] = 20; a[2] = 30;
+  i = 3;
+  print_integers(a, 0, i);
+}
