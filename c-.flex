@@ -67,7 +67,7 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 digit = [0-9]
 number = {digit}+
 letter = [a-zA-Z]
-identifier = {letter}({letter}|{digit}|"_")*
+identifier = {letter}+
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */

@@ -21,7 +21,7 @@ Lexer.java: c-.flex
 	$(JFLEX) c-.flex
 
 parser.java: c-.cup
-	$(CUP) -dump -expect 3 < c-.cup
+	$(CUP) -expect 3 < c-.cup
 
 test:
 	@for file in $(FILES) ; do \

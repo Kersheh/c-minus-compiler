@@ -25,14 +25,8 @@ abstract public class Absyn {
       showTree( (IntExp)tree, spaces );
     else if( tree instanceof OpExp )
       showTree( (OpExp)tree, spaces );
-    else if( tree instanceof ReadExp )
-      showTree( (ReadExp)tree, spaces );
-    else if( tree instanceof RepeatExp )
-      showTree( (RepeatExp)tree, spaces );
     else if( tree instanceof VarExp )
       showTree( (VarExp)tree, spaces );
-    else if( tree instanceof WriteExp ) 
-      showTree( (WriteExp)tree, spaces );
     else {
       indent( spaces );
       System.out.println( "Illegal expression at line " + tree.pos  );
@@ -103,29 +97,9 @@ abstract public class Absyn {
     showTree( tree.right, spaces ); 
   }
 
-  static private void showTree( ReadExp tree, int spaces ) {
-    indent( spaces );
-    System.out.println( "ReadExp:" );
-    showTree( tree.input, spaces + SPACES );  
-  }
-
-  static private void showTree( RepeatExp tree, int spaces ) {
-    indent( spaces );
-    System.out.println( "RepeatExp:" );
-    spaces += SPACES;
-    showTree( tree.exps, spaces );
-    showTree( tree.test, spaces ); 
-  }
-
   static private void showTree( VarExp tree, int spaces ) {
     indent( spaces );
     System.out.println( "VarExp: " + tree.name );
-  }
-
-  static private void showTree( WriteExp tree, int spaces ) {
-    indent( spaces );
-    System.out.println( "WriteExp:" );
-    showTree( tree.output, spaces + SPACES ); 
   }
 
 }
