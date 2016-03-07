@@ -5,7 +5,7 @@ JAVA=java
 JAVAC=javac
 JFLEX=jflex
 CLASSPATH=-classpath ./java/cup.jar:.
-CUP=$(JAVA) $(CLASSPATH) java_cup.Main <
+CUP=$(JAVA) $(CLASSPATH) java_cup.Main
 
 DIRS = programs
 FILES = $(wildcard $(DIRS:=/*.cm))
@@ -21,7 +21,7 @@ Lexer.java: c-.flex
 	$(JFLEX) c-.flex
 
 parser.java: c-.cup
-	$(CUP) c-.cup
+	$(CUP) -dump -expect 3 < c-.cup
 
 test:
 	@for file in $(FILES) ; do \

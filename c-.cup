@@ -253,12 +253,12 @@ non terminal Exp relop, addop, mulop, factor, term, call, args;
                   {:
                     //
                   :}
-                  /*
+                  
                   | IF LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
                   {:
                     //
                   :}
-                  */
+                  
                   ;
 
   // iteration-stmt --> while ( expression ) statement
