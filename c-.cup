@@ -98,9 +98,9 @@ non terminal Exp relop, addop, mulop, factor, term, call, args;
   // declaration-list --> declaration-list delcaration | declaration
   declar_list ::= declar_list:d1 declar:d2
                   {:
-                    ExpList t = d1
+                    ExpList t = d1;
                     while(t.tail != null)
-                      t = t.tail
+                      t = t.tail;
                     t.tail = new ExpList(d2, null);
                     RESULT = d1;
                   :}
@@ -253,10 +253,12 @@ non terminal Exp relop, addop, mulop, factor, term, call, args;
                   {:
                     //
                   :}
+                  /*
                   | IF LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
                   {:
                     //
                   :}
+                  */
                   ;
 
   // iteration-stmt --> while ( expression ) statement

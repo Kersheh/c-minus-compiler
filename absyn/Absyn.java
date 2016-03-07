@@ -95,9 +95,6 @@ abstract public class Absyn {
       case OpExp.NOTEQ:
         System.out.println( " != " );
         break;
-      case OpExp.ASSIGN:
-        System.out.println( " = " );
-        break;
       default:
         System.out.println( "Unrecognized operator at line " + tree.pos);
     }
