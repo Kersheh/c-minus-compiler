@@ -84,6 +84,13 @@ non terminal Exp param, empty, stmt, exp_stmt, comp_stmt, select_stmt;
 non terminal Exp iter_stmt, return_stmt, exp, simple_exp, add_exp, var;
 non terminal Exp relop, addop, mulop, factor, term, call, args;
 
+precedence nonassoc RETURN;
+precedence right ASSIGN;
+precedence left LT, LTEQ, GT, GTEQ, EQ, NOTEQ;
+precedence left PLUS, MINUS;
+precedence left TIMES, OVER;
+precedence left ELSE;
+
 /* ----------------------------Grammar Section-------------------- */
   
   // program --> declaration-list
