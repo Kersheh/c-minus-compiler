@@ -59,7 +59,7 @@ import java_cup.runtime.*;
 /*
   Macro Declarations
   
-  These declarations are regular expressions that will be used latter
+  These declarations are regular expressions that will be used later
   in the Lexical Rules Section.  
 */
 LineTerminator = \r|\n|\r\n
