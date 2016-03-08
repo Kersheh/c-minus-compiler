@@ -5,7 +5,7 @@ JAVA=java
 JAVAC=javac
 JFLEX=jflex
 CLASSPATH=-classpath ./java/cup.jar:.
-CUP=$(JAVA) $(CLASSPATH) java_cup.Cminus
+CUP=$(JAVA) $(CLASSPATH) java_cup.Main
 
 DIRS = programs
 FILES = $(wildcard $(DIRS:=/*.cm))

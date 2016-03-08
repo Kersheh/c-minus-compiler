@@ -87,8 +87,8 @@ non terminal TypeSpec type;
 non terminal Params params;
 non terminal ParamList param_list;
 non terminal Param param;
-non terminal Exp exp, simple_exp, add_exp, var;
-non terminal Exp factor, term, call, args, arg_list;
+non terminal ExpList args, arg_list;
+non terminal Exp exp, var, factor, call;
 non terminal Integer binary_op;
 
 precedence nonassoc RETURN;
@@ -387,26 +387,33 @@ precedence left ELSE;
   // call --> ID ( args )
   call        ::= ID:i LPAREN args:a RPAREN
                   {:
-                    //
+                    RESULT = new ExpCall(ileft, i, a);
                   :}
                   ;
 
   // args --> arg-list | empty
-  args        ::= arg_list:a COMMA exp:e
+  args        ::= arg_list:a
                   {:
-                    //
+                    RESULT = a;
                   :}
                   | //empty
+                  {:
+                    RESULT = null;
+                  :}
                   ;
 
   // arg-list --> arg-list , expression | expression
   arg_list    ::= arg_list:a COMMA exp:e
                   {:
-                    //
+                    ExpList t = a;
+                    while(t.tail != null)
+                      t = t.tail;
+                    t.tail = new ExpList(e, null);
+                    RESULT = a;
                   :}
                   | exp:e
                   {:
-                    //
+                    RESULT = new ExpList(e, null);
                   :}
                   ;
 
