@@ -23,7 +23,7 @@ class Cminus {
       }
       else {
         try {
-          parser p = new parser(new Lexer(new FileReader(args[1])));
+          parser p = new parser(args[0], new Lexer(new FileReader(args[1])));
           Object result = p.parse().value;      
         } catch(Exception e) {
           /* do cleanup here -- possibly rethrow e */

@@ -13,6 +13,13 @@ import absyn.*;
 /* Parser code to change the way the parser reports errors (include
    line and column number of the error). */
 parser code {:
+
+    public String flag = "";
+
+    public parser(String arg, java_cup.runtime.Scanner s){
+      super(s);
+      this.flag = arg;
+    }
     
     /* Change the method report_error so it will display the line and
        column of where the error occurred in the input as well as the
@@ -109,8 +116,12 @@ precedence left ELSE;
   program     ::= declar_list:d
                   {:
                     RESULT = d;
-                    System.out.println("The abstract syntax tree is:");
-                    Absyn.showTree(RESULT, 0);
+                    if ("-a".equals(this.parser.flag)) {
+                      System.out.println("The abstract syntax tree is:");
+                      Absyn.showTree(RESULT, 0);
+                    } else {
+                      System.out.println("Parse complete");
+                    }
                   :}
                   ;
 
@@ -155,6 +166,10 @@ precedence left ELSE;
                   {:
                     RESULT = new DeclarVar(tleft, t, i, true);
                   :}
+                  | error:e
+                  {:
+                    parser.report_error("Invalid variable declaration", e);
+                  :}
                   ;
 
   // type-specifier --> int | void
@@ -172,6 +187,10 @@ precedence left ELSE;
   fun_declar  ::= type:t ID:i LPAREN params:p RPAREN comp_stmt:c
                   {:
                     RESULT = new DeclarFun(tleft, t, i, p, c);
+                  :}
+                  | error:e
+                  {:
+                    parser.report_error("Invalid function declaration", e);
                   :}
                   ;
 
@@ -208,13 +227,13 @@ precedence left ELSE;
                   ;
 
   // param --> type-specifier ID | type-specifier ID [ ]
-  param       ::= type:t ID:i
+  param       ::= INT:t ID:i
                   {:
-                    RESULT = new Param(tleft, t, i, false);
+                    RESULT = new Param(tleft, new TypeSpec(tleft, "int"), i, false);
                   :}
-                  | type:t ID:i LBRACKET RBRACKET 
+                  | INT:t ID:i LBRACKET RBRACKET 
                   {:
-                    RESULT = new Param(tleft, t, i, true);
+                    RESULT = new Param(tleft, new TypeSpec(tleft, "int"), i, true);
                   :}
                   ;
 
@@ -282,6 +301,10 @@ precedence left ELSE;
                   | return_stmt:s
                   {:
                     RESULT = s;
+                  :}
+                  | error:e
+                  {:
+                    parser.report_error("Invalid statement", e);
                   :}
                   ;
 

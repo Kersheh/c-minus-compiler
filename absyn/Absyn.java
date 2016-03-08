@@ -51,11 +51,14 @@ abstract public class Absyn {
       showTree((DeclarFun)tree, spaces);
     else {
       indent(spaces);
-      System.out.println("Illegal declaration at line " + tree.pos);
+      System.out.println("Illegal declaration");
     }
   }
 
   static private void showTree(DeclarVar tree, int spaces) {
+    if(tree == null) {
+      return;
+    }
     indent(spaces);
     if (tree.array)
       System.out.println("DeclarVar: " + tree.type.type + " " + tree.name + "[]");
@@ -105,7 +108,7 @@ abstract public class Absyn {
       showTree((StmtReturn)tree, spaces);
     else {
       indent(spaces);
-      System.out.println("Illegal statement at line " + tree.pos);
+      System.out.println("Illegal statement");
     }
   }
 
