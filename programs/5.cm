@@ -15,6 +15,5 @@ void function() {
 int void main(void array[]) {
   int array[0;];
   main();
-  function(x);
-  return main(array);
+  return function(x);
 }
