@@ -5,14 +5,14 @@ JAVA=java
 JAVAC=javac
 JFLEX=jflex
 CLASSPATH=-classpath ./java/cup.jar:.
-CUP=$(JAVA) $(CLASSPATH) java_cup.C-
+CUP=$(JAVA) $(CLASSPATH) java_cup.Cminus
 
 DIRS = programs
 FILES = $(wildcard $(DIRS:=/*.cm))
 
-all: C-.class
+all: Cminus.class
 
-C-.class: absyn/*.java parser.java sym.java Lexer.java C-.java
+Cminus.class: absyn/*.java parser.java sym.java Lexer.java Cminus.java
 
 %.class: %.java
 	$(JAVAC) $(CLASSPATH)  $^
@@ -26,7 +26,7 @@ parser.java: c-.cup
 test:
 	@for file in $(FILES) ; do \
 		echo PROGRAM $$file: ; \
-		java $(CLASSPATH) C- $$file ; \
+		java $(CLASSPATH) Cminus $$file ; \
 		echo ----------------------- ; \
 	done
 
