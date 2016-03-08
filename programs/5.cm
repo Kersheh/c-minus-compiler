@@ -1,6 +1,19 @@
 /*
   Created by: Matt Breckon and Dean Way
   File name: 5.cm
-  Anything goes; there is no limit to number and type of errors.
-  EXPLAIN PROGRAM AND ERRORS HERE WHEN DEVELOPED
+  Sample program designed to be completely broken.
 */
+
+int x;
+x = a;
+void a = x;
+
+void function() {
+  return return;
+};
+
+int void main(void array[]) {
+  int array[0;];
+  main();
+  return function(x);
+}

@@ -5,3 +5,4 @@ sym.java
 *.class
 absyn/*.class
 *~
+*.docx
