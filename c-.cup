@@ -78,11 +78,18 @@ terminal SEMI, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 terminal String ID, NUM;
 terminal ERROR;
    
-non terminal ExpList program, declar_list, params, param_list, stmt_list, arg_list;
-non terminal Exp declar, var_declar, fun_declar, loc_declar, type;
-non terminal Exp param, stmt, exp_stmt, comp_stmt, select_stmt;
-non terminal Exp iter_stmt, return_stmt, exp, simple_exp, add_exp, var;
-non terminal Exp binary_op, factor, term, call, args;
+non terminal DeclarList program, declar_list;
+non terminal Declar declar, var_declar, fun_declar;
+non terminal StmtList stmt_list;
+non terminal Stmt stmt, exp_stmt, comp_stmt, select_stmt, iter_stmt, return_stmt;
+non terminal DeclarListLocal loc_declar;
+non terminal TypeSpec type;
+non terminal Params params;
+non terminal ParamList param_list;
+non terminal Param param;
+non terminal Exp exp, simple_exp, add_exp, var;
+non terminal Exp factor, term, call, args, arg_list;
+non terminal Integer binary_op;
 
 precedence nonassoc RETURN;
 precedence right ASSIGN;
@@ -105,102 +112,110 @@ precedence left ELSE;
   // declaration-list --> declaration-list delcaration | declaration
   declar_list ::= declar_list:d1 declar:d2
                   {:
-                    ExpList t = d1;
+                    DeclarList t = d1;
                     while(t.tail != null)
                       t = t.tail;
-                    t.tail = new ExpList(d2, null);
+                    t.tail = new DeclarList(d2, null);
                     RESULT = d1;
                   :}
                   | declar:d
                   {:
-                    RESULT = new ExpList(d, null);
+                    RESULT = new DeclarList(d, null);
                   :}
                   ;
 
   // declaration--> var-delcaration | fun-declaration
   declar      ::= var_declar:d
                   {:
-                    //
+                    RESULT = d;
                   :}
                   | fun_declar:d
                   {:
-                    //
+                    RESULT = d;
                   :}
                   ;
 
   // var-declaration --> type-specifier ID ; | type-specifier ID [ NUM ] ;
   var_declar  ::= type:t ID:i SEMI
                   {:
-                    //
+                    RESULT = new DeclarVar(tleft, t, i, false);
                   :}
                   | type:t ID:i RBRACKET NUM:n LBRACKET SEMI
                   {:
-                    //
+                    RESULT = new DeclarVar(tleft, t, i, true);
                   :}
                   ;
 
   // type-specifier --> int | void
   type        ::= INT:i
                   {:
-                    //
+                    RESULT = new TypeSpec(ileft, i.toString());
                   :}
-                  | VOID
+                  | VOID:v
                   {:
-                    //
+                    RESULT = new TypeSpec(vleft, v.toString());
                   :}
                   ;
 
   // fun-declaration --> type-specifier ID ( params ) compound-stmt
   fun_declar  ::= type:t ID:i LPAREN params:p RPAREN comp_stmt:c
                   {:
-                    //
+                    RESULT = new DeclarFun(tleft, t, i, p, c);
                   :}
                   ;
 
   // params --> param-list | void
   params      ::= param_list:p
                   {:
-                    //
+                    RESULT = new Params(pleft, p);
                   :}
                   | VOID:v
                   {:
-                    //
+                    RESULT = new Params(vleft, null);
                   :}
                   ;
 
   // param-list --> param-list , param | param
   param_list  ::= param_list:p1 COMMA param:p2
                   {:
-                    //
+                    ParamList t = p1;
+                    while(t.tail != null)
+                      t = t.tail;
+                    t.tail = new ParamList(p2, null);
+                    RESULT = p1;
                   :}
                   | param:p
                   {:
-                    //
+                    RESULT = p;
                   :}
                   ;
 
   // param --> type-specifier ID | type-specifier ID [ ]
   param       ::= type:t ID:i
                   {:
-                    //
+                    RESULT = new Param(tleft, t, i, false);
                   :}
                   | type:t ID:i RBRACKET LBRACKET
                   {:
-                    //
+                    RESULT = new Param(tleft, t, i, true);
                   :}
                   ;
 
   // compound-stmt --> { local-declarations statement-list }
-  comp_stmt   ::= LBRACE loc_declar:d stmt_list:s RBRACE
+  comp_stmt   ::= LBRACE:lb loc_declar:d stmt_list:s RBRACE
                   {:
-                    //
+                    RESULT = new StmtComp(lbleft, d, s);
                   :}
                   ;
 
   // local-declarations --> local-declarations var-declaration | empty
   loc_declar  ::= loc_declar:d1 var_declar:d2
                   {:
-                    //
+                    DeclarListLocal t = d1;
+                    while(t.tail != null)
+                      t = t.tail;
+                    t.tail = new DeclarListLocal(d2, null);
+                    RESULT = d1;
                   :}
                   | //empty
                   ;
@@ -208,7 +223,11 @@ precedence left ELSE;
   // statement-list --> statement-list statement | empty
   stmt_list   ::= stmt_list:s1 stmt:s2
                   {:
-                    //
+                    StmtList t = s1;
+                    while(t.tail != null)
+                      t = t.tail;
+                    t.tail = new ExpList(s2, null);
+                    RESULT = s1;
                   :}
                   | //empty
                   ;
@@ -217,114 +236,151 @@ precedence left ELSE;
   //               | iteration-stmt | return-stmt
   stmt        ::= exp_stmt:s
                   {:
-                    //
+                    RESULT = s;
                   :}
                   | comp_stmt:s
                   {:
-                    //
+                    RESULT = s;
                   :}
                   | select_stmt:s
                   {:
-                    //
+                    RESULT = s;
                   :}
                   | iter_stmt:s
                   {:
-                    //
+                    RESULT = s;
                   :}
                   | return_stmt:s
                   {:
-                    //
+                    RESULT = s;
                   :}
                   ;
 
   // expression --> expression ; | ;
   exp_stmt    ::= exp:e SEMI
                   {:
-                    //
+                    RESULT = new StmtExp(eleft, e);
                   :}
                   | SEMI
-                  {:
-                    //
-                  :}
                   ;
 
   // selection-stmt --> if ( expression ) statement
   //                    | if ( expression ) statement else statement
-  select_stmt ::= IF LPAREN exp:e RPAREN stmt:s
+  select_stmt ::= IF:i LPAREN exp:e RPAREN stmt:s
                   {:
-                    //
+                    RESULT = new StmtSelect(ileft, e, s, null);
                   :}
                   
-                  | IF LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
+                  | IF:i LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
                   {:
-                    //
+                    RESULT = new StmtSelect(ileft, e, s1, s2);
                   :}
                   
                   ;
 
   // iteration-stmt --> while ( expression ) statement
-  iter_stmt   ::= WHILE LPAREN exp:e RPAREN stmt:s
+  iter_stmt   ::= WHILE:w LPAREN exp:e RPAREN stmt:s
                   {:
                     //
                   :}
                   ;
 
   // return-stmt --> return ; | return expression ;
-  return_stmt ::= RETURN SEMI
+  return_stmt ::= RETURN:r SEMI
                   {:
-                    //
+                    RESULT = new StmtReturn(rleft, null);
                   :}
-                  | RETURN exp:e SEMI
+                  | RETURN:r exp:e SEMI
                   {:
-                    //
+                    RESULT = new StmtReturn(rleft, e);
                   :}
                   ;
 
   // expression --> var = expression | expression binary_op expression | factor
   exp         ::= var:v ASSIGN exp:e
                   {:
-                    //
+                    RESULT = new ExpAssign(vleft, v, e);
                   :}
                   | exp:e1 binary_op:bop exp:e2
                   {:
-                    //
+                    RESULT = new ExpOp(e1left, e1, bop, e2);
                   :}
-                  | factor
+                  | factor:f
                   {:
-                    //
+                    RESULT = f;
                   :}
                   ;
 
   // var --> ID | ID [ expression ]
   var         ::= ID:i
                   {:
-                    //
+                    RESULT = new ExpVar(ileft, i, null);
                   :}
                   | ID:i LBRACKET exp:e RBRACKET
                   {:
-                    //
+                    RESULT = new ExpVar(ileft, i, e);
                   :}
                   ;
 
   // binary_op --> + | - | * | / <= | < | > | >= | == | !=
-  binary_op   ::= PLUS | MINUS | TIMES | OVER | LTEQ | LT | GT | GTEQ | EQ | NOTEQ;
+  binary_op   ::= PLUS 
+                  {:
+                    RESULT = ExpOp.PLUS;
+                  :}
+                  | MINUS
+                  {:
+                    RESULT = ExpOp.MINUS;
+                  :}
+                  | TIMES
+                  {:
+                    RESULT = ExpOp.TIMES;
+                  :}
+                  | OVER
+                  {:
+                    RESULT = ExpOp.OVER;
+                  :}
+                  | LTEQ
+                  {:
+                    RESULT = ExpOp.LTEQ;
+                  :}
+                  | LT
+                  {:
+                    RESULT = ExpOp.LT;
+                  :}
+                  | GT
+                  {:
+                    RESULT = ExpOp.GT;
+                  :}
+                  | GTEQ
+                  {:
+                    RESULT = ExpOp.GTEQ;
+                  :}
+                  | EQ
+                  {:
+                    RESULT = ExpOp.EQ;
+                  :}
+                  | NOTEQ
+                  {:
+                    RESULT = ExpOp.NOTEQ;
+                  :}
+                  ;
 
   // factor --> ( expression ) | var | call | NUM
   factor      ::= LPAREN exp:e RPAREN
                   {:
-                    //
+                    RESULT = e;
                   :}
                   | var:v
                   {:
-                    //
+                    RESULT = v;
                   :}
                   | call:c
                   {:
-                    //
+                    RESULT = c;
                   :}
                   | NUM:n
                   {:
-                    //
+                    RESULT = new ExpConst(n);
                   :}
                   ;
 

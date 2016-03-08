@@ -1,8 +1,8 @@
 package absyn;
 
 public class StmtReturn extends Stmt {
-  public ExpVar item;
-  public StmtReturn(int pos, ExpVar item) {
+  public Exp item;
+  public StmtReturn(int pos, Exp item) {
     this.pos = pos;
     this.item = item;
   }
