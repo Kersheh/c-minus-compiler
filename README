@@ -1,30 +1,15 @@
-NOTE: Professor's original README found below.
+A JFlex/Cup implementation for the C-Minus language.
 
-cup.jar is found within the directory /java. Makefile has been modified to 
-account for this. Added /programs folder to hold testing programs. Added test 
-to Makefile to execute all .cm programs found within the /programs folder.
+To build and compile the project, run:
+  $ make
 
--------------------------------------------------------------------------------
+Makefile builds the scanner file c-.flex using the JFlex lexer/scanner 
+generator for Java, builds the parser file c-.cup using the CUP LALR(1) parser 
+generator for Java along with the abstract syntax tree Java files found in the 
+directory /absyn, and finally compiles the C-Minus Main Java file.
 
-A JFlex+Cup implementation for the Tiny language.
+To scan/parse C-Minus source code with optional abstract syntax tree -a, run: 
+  $ java -classpath ./java/cup.jar:. C- [-a] [file_name.cm]
 
-  Note that you need to modify the classpath in the Makefile so that it
-will point to the directory where "java_cup" is located.  In my own setting,
-classpath is /usr/share/java/cup.jar.
-
-  To build the parser, type "make" in the current directory, which will 
-generate an executable program called "tiny".
-
-  To test source code like "gcd.tiny", type 
-
-    "java -classpath /usr/share/java/cup.jar:. Main gcd.tiny" 
-
-and the syntax tree will be displayed on the screen.
-
-  To rebuild the parser, type "make clean" and type "make" again.
-
-  Also note that all the abstract syntax tree structures are defined under
-the directory "absyn" and within "Absyn.java" class, the showTree function
-is implemented.  In addition, since some java files are generated automatically,
-they may contain variables that are not used, which are safe to ignore in
-the compilation process.
+To run the test suite of sample C-Minus programs, run:
+  $ make test
