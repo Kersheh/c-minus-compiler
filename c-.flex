@@ -32,7 +32,7 @@ import java_cup.runtime.*;
    generated parser.
 */
 %cup
-   
+
 /*
   Declarations
    
@@ -68,6 +68,9 @@ digit = [0-9]
 number = {digit}+
 letter = [a-zA-Z]
 identifier = {letter}+
+
+/* comments */
+Comment   = "/*" [^*] ~"*/" | "/*" "*"+ "/"
    
 %%
 /* ------------------------Lexical Rules Section---------------------- */
@@ -102,5 +105,5 @@ identifier = {letter}+
 {identifier}       { return symbol(sym.ID, yytext()); }
 {number}           { return symbol(sym.NUM, yytext()); }
 {WhiteSpace}*      { /* skip whitespace */ }   
-"/*".*"*/"         { /* skip comments */ }
+{Comment}          { /* skip comment */ }
 .                  { return symbol(sym.ERROR); }
