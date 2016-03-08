@@ -80,9 +80,9 @@ terminal ERROR;
    
 non terminal ExpList program, declar_list, params, param_list, stmt_list, arg_list;
 non terminal Exp declar, var_declar, fun_declar, loc_declar, type;
-non terminal Exp param, empty, stmt, exp_stmt, comp_stmt, select_stmt;
+non terminal Exp param, stmt, exp_stmt, comp_stmt, select_stmt;
 non terminal Exp iter_stmt, return_stmt, exp, simple_exp, add_exp, var;
-non terminal Exp relop, addop, mulop, factor, term, call, args;
+non terminal Exp binary_op, factor, term, call, args;
 
 precedence nonassoc RETURN;
 precedence right ASSIGN;
@@ -144,7 +144,7 @@ precedence left ELSE;
                   {:
                     //
                   :}
-                  | VOID:v
+                  | VOID
                   {:
                     //
                   :}
@@ -202,10 +202,7 @@ precedence left ELSE;
                   {:
                     //
                   :}
-                  | empty
-                  {:
-                    //
-                  :}
+                  | //empty
                   ;
 
   // statement-list --> statement-list statement | empty
@@ -213,10 +210,7 @@ precedence left ELSE;
                   {:
                     //
                   :}
-                  | empty
-                  {:
-                    //
-                  :}
+                  | //empty
                   ;
 
   // statement --> expression-stmt | compound-stmt | selection-stmt
@@ -286,12 +280,16 @@ precedence left ELSE;
                   :}
                   ;
 
-  // expression --> var = expression | simple-expression
+  // expression --> var = expression | expression binary_op expression | factor
   exp         ::= var:v ASSIGN exp:e
                   {:
                     //
                   :}
-                  | simple_exp:e
+                  | exp:e1 binary_op:bop exp:e2
+                  {:
+                    //
+                  :}
+                  | factor
                   {:
                     //
                   :}
@@ -308,88 +306,8 @@ precedence left ELSE;
                   :}
                   ;
 
-  // simple-expression --> additive-expression relop additive-expression
-  //                       | additive-expression
-  simple_exp  ::= add_exp:e1 relop:o add_exp:e2
-                  {:
-                    //
-                  :}
-                  | add_exp:e
-                  {:
-                    //
-                  :}
-                  ;
-
-  // relop --> <= | < | > | >= | == | !=
-  relop       ::= LTEQ
-                  {:
-                    //
-                  :}
-                  | LT
-                  {:
-                    //
-                  :}
-                  | GT
-                  {:
-                    //
-                  :}
-                  | GTEQ
-                  {:
-                    //
-                  :}
-                  | EQ
-                  {:
-                    //
-                  :}
-                  | NOTEQ
-                  {:
-                    //
-                  :}
-                  ;
-
-  // additive-expression --> additive-expression addop term | term
-  add_exp     ::= add_exp:e addop:o term:t
-                  {:
-                    //
-                  :}
-                  | term:t
-                  {:
-                    //
-                  :}
-                  ;
-
-  // addop --> + | -
-  addop       ::= PLUS
-                  {:
-                    //
-                  :}
-                  | MINUS
-                  {:
-                    //
-                  :}
-                  ;
-
-  // term --> term mulop factor | factor
-  term        ::= term:t mulop:o factor:f
-                  {:
-                    //
-                  :}
-                  | factor:f
-                  {:
-                    //
-                  :}
-                  ;
-
-  // mulop --> * | /
-  mulop       ::= TIMES
-                  {:
-                    //
-                  :}
-                  | OVER
-                  {:
-                    //
-                  :}
-                  ;
+  // binary_op --> + | - | * | / <= | < | > | >= | == | !=
+  binary_op   ::= PLUS | MINUS | TIMES | OVER | LTEQ | LT | GT | GTEQ | EQ | NOTEQ;
 
   // factor --> ( expression ) | var | call | NUM
   factor      ::= LPAREN exp:e RPAREN
@@ -422,10 +340,7 @@ precedence left ELSE;
                   {:
                     //
                   :}
-                  | exp:e
-                  {:
-                    //
-                  :}
+                  | //empty
                   ;
 
   // arg-list --> arg-list , expression | expression
