@@ -79,16 +79,21 @@ terminal String ID, NUM;
 terminal ERROR;
    
 non terminal DeclarList program, declar_list;
-non terminal Declar declar, var_declar, fun_declar;
+non terminal Declar declar;
+non terminal DeclarVar var_declar;
+non terminal DeclarFun fun_declar;
 non terminal StmtList stmt_list;
-non terminal Stmt stmt, exp_stmt, comp_stmt, select_stmt, iter_stmt, return_stmt;
+non terminal Stmt stmt, exp_stmt, select_stmt, iter_stmt, return_stmt;
+non terminal StmtComp comp_stmt;
 non terminal DeclarListLocal loc_declar;
 non terminal TypeSpec type;
 non terminal Params params;
 non terminal ParamList param_list;
 non terminal Param param;
 non terminal ExpList args, arg_list;
-non terminal Exp exp, var, factor, call;
+non terminal Exp exp, factor;
+non terminal ExpVar var;
+non terminal ExpCall call;
 non terminal Integer binary_op;
 
 precedence nonassoc RETURN;
@@ -186,7 +191,7 @@ precedence left ELSE;
                   :}
                   | param:p
                   {:
-                    RESULT = p;
+                    RESULT = new ParamList(p, null);
                   :}
                   ;
 
@@ -226,7 +231,7 @@ precedence left ELSE;
                     StmtList t = s1;
                     while(t.tail != null)
                       t = t.tail;
-                    t.tail = new ExpList(s2, null);
+                    t.tail = new StmtList(s2, null);
                     RESULT = s1;
                   :}
                   | //empty
@@ -380,7 +385,7 @@ precedence left ELSE;
                   :}
                   | NUM:n
                   {:
-                    RESULT = new ExpConst(n);
+                    RESULT = new ExpConst(nleft, Integer.parseInt(n.toString()));
                   :}
                   ;
 
