@@ -15,41 +15,184 @@ abstract public class Absyn {
       tree = tree.tail;
     }
   }
-}
 
-//   static public void showTree(ExpList tree, int spaces) {
-//     while(tree != null) {
-//       showTree(tree.head, spaces);
-//       tree = tree.tail;
-//     } 
-//   }
+  static public void showTree(DeclarListLocal tree, int spaces) {
+    while(tree != null) {
+      showTree(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
 
-//   static private void showTree(Exp tree, int spaces) {
-//     if(tree instanceof AssignExp)
-//       showTree((AssignExp)tree, spaces);
-//     else if(tree instanceof IfExp)
-//       showTree((IfExp)tree, spaces);
-//     else if(tree instanceof IntExp)
-//       showTree((IntExp)tree, spaces);
-//     else if(tree instanceof OpExp)
-//       showTree((OpExp)tree, spaces);
-//     else if(tree instanceof VarExp)
-//       showTree((VarExp)tree, spaces);
-//     else if(tree instanceof ReturnExp)
-//       showTree((ReturnExp)tree, spaces);
-//     else {
-//       indent(spaces);
-//       System.out.println("Illegal expression at line " + tree.pos);
-//     }
-//   }
+  static public void showTree(ExpList tree, int spaces) {
+    while(tree != null) {
+      showTree(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
 
-//   static private void showTree(AssignExp tree, int spaces) {
-//     indent(spaces);
-//     System.out.println("AssignExp:");
-//     spaces += SPACES;
-//     showTree(tree.lhs, spaces);
-//     showTree(tree.rhs, spaces);
-//   }
+  static public void showTree(StmtList tree, int spaces) {
+    while(tree != null) {
+      showTree(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  static public void showTree(ParamList tree, int spaces) {
+    while(tree != null) {
+      showTree(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  static public void showTree(Declar tree, int spaces) {
+    if(tree instanceof DeclarVar)
+      showTree((DeclarVar)tree, spaces);
+    else if(tree instanceof DeclarFun)
+      showTree((DeclarFun)tree, spaces);
+    else {
+      indent(spaces);
+      System.out.println("Illegal declaration at line " + tree.pos);
+    }
+  }
+
+  static private void showTree(DeclarVar tree, int spaces) {
+    indent(spaces);
+    if (tree.array)
+      System.out.println("DeclarVar: " + tree.type.type + " " + tree.name + "[]");
+    else
+      System.out.println("DeclarVar: " + tree.type.type + " " + tree.name );
+  }
+
+  static private void showTree(DeclarFun tree, int spaces) {
+    indent(spaces);
+    System.out.println("DeclarFun: " + tree.type.type + " " + tree.name);
+    spaces += SPACES;
+    showTree(tree.params, spaces);
+    showTree(tree.stmt, spaces);
+  }
+
+  static private void showTree(Params tree, int spaces) {
+    indent(spaces);
+    System.out.println("Params:");
+    spaces += SPACES;
+    if(tree.isVoidParams){
+      indent(spaces);
+      System.out.println("VOID");
+    }
+    else{
+      showTree(tree.param_list, spaces);
+    }
+  }
+
+  static private void showTree(Param tree, int spaces) {
+    indent(spaces);
+    if (tree.array)
+      System.out.println("Param: " + tree.type.type + " " + tree.id + "[]");
+    else
+      System.out.println("Param: " + tree.type.type + " " + tree.id );
+  }
+
+  static private void showTree(Stmt tree, int spaces) {
+    if(tree instanceof StmtComp)
+      showTree((StmtComp)tree, spaces);
+    else if(tree instanceof StmtExp)
+      showTree((StmtExp)tree, spaces);
+    else if(tree instanceof StmtSelect)
+      showTree((StmtSelect)tree, spaces);
+    //else if(tree instanceof StmtWhile)
+    //  showTree((StmtWhile)tree, spaces);
+    else if(tree instanceof StmtReturn)
+      showTree((StmtWhile)tree, spaces);
+    else {
+      indent(spaces);
+      System.out.println("Illegal statement at line " + tree.pos);
+    }
+  }
+
+  static private void showTree(StmtComp tree, int spaces) {
+    indent(spaces);
+    System.out.println("StmtComp:");
+    spaces += SPACES;
+    showTree(tree.declar_local, spaces);
+    showTree(tree.stmt_list, spaces);
+  }
+
+  static private void showTree(StmtExp tree, int spaces) {
+    indent(spaces);
+    System.out.println("StmtExp:");
+    spaces += SPACES;
+    showTree(tree.exp, spaces);
+  }
+
+  static private void showTree(StmtSelect tree, int spaces) {
+    indent(spaces);
+    System.out.println("StmtSelect:");
+    spaces += SPACES;
+    showTree(tree.test, spaces);
+    showTree(tree.then_stmt, spaces);
+    showTree(tree.else_stmt, spaces);
+  }
+
+  static private void showTree(StmtReturn tree, int spaces) {
+    indent(spaces);
+    System.out.println("StmtReturn:");
+    spaces += SPACES;
+    showTree(tree.item, spaces);
+  }
+
+  static public void showTree(Exp tree, int spaces) {
+    if(tree instanceof ExpAssign)
+      showTree((ExpAssign)tree, spaces);
+    else if(tree instanceof ExpCall)
+      showTree((ExpCall)tree, spaces);
+    else if(tree instanceof ExpConst)
+      showTree((ExpConst)tree, spaces);
+    else if(tree instanceof ExpOp)
+      showTree((ExpOp)tree, spaces);
+    else if(tree instanceof ExpVar)
+      showTree((ExpVar)tree, spaces);
+    else {
+      indent(spaces);
+      System.out.println("Illegal expression at line " + tree.pos);
+    }
+  }
+
+  static private void showTree(ExpAssign tree, int spaces) {
+    indent(spaces);
+    System.out.println("ExpAssign:");
+    spaces += SPACES;
+    showTree(tree.lhs, spaces);
+    showTree(tree.rhs, spaces);
+  }
+
+  static private void showTree(ExpCall tree, int spaces) {
+    indent(spaces);
+    System.out.println("ExpCall: " + tree.id);
+    spaces += SPACES;
+    showTree(tree.args, spaces);
+  }
+
+  static private void showTree(ExpConst tree, int spaces) {
+    indent(spaces);
+    System.out.println("ExpConst: " + tree.val);
+  }
+
+  static private void showTree(ExpVar tree, int spaces) {
+    indent(spaces);
+    if(tree.exp == null)
+      System.out.println("ExpVar: " + tree.name);
+    else{
+      System.out.println("ExpVar: " + tree.name);
+      spaces += SPACES;
+      showTree(tree.exp, spaces);
+    }
+  }
+
+  static private void showTree(ExpOp tree, int spaces) {
+    indent(spaces);
+    System.out.println("ExpOp: ");
+  }
+
 
 //   static private void showTree(IfExp tree, int spaces) {
 //     indent(spaces);
@@ -132,3 +275,4 @@ abstract public class Absyn {
 //     showTree(tree.output, spaces + SPACES); 
 //   }
 // }
+}
