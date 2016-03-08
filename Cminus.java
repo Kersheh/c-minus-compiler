@@ -11,14 +11,14 @@ class Cminus {
   static public void main(String args[]) {
     if(args.length > 2) {
       System.out.println("Invalid number of arguments.");
-      System.out.println("usage: java Cminus [-a] [file_name.cm");
+      System.out.println("usage: java Cminus [-a] [file_name.cm]");
       return;
     }
     /* args: -a and file */
     if(args.length == 2) {
       if(!args[0].equals("-a")) {
         System.out.println("Invalid argument: " + args[0]);
-        System.out.println("usage: java Cminus [-a] [file_name.cm");
+        System.out.println("usage: java Cminus [-a] [file_name.cm]");
         return;
       }
       else {

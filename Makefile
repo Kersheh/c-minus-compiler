@@ -30,5 +30,12 @@ test:
 		echo ----------------------- ; \
 	done
 
+test_tree:
+	@for file in $(FILES) ; do \
+		echo PROGRAM $$file: ; \
+		java $(CLASSPATH) Cminus -a $$file ; \
+		echo ----------------------- ; \
+	done
+
 clean:
 	rm -f parser.java Lexer.java sym.java *.class absyn/*.class *~
