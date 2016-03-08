@@ -7,7 +7,8 @@
 */
 
 int largest(int a, int b, int c) {
-  int result = a;
+  int result;
+  result = a;
   if(b > result) result = b;
   if(c > result) result = c;
   return result;

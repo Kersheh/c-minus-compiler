@@ -2,10 +2,10 @@ package absyn;
 
 public class StmtWhile extends Stmt {
   public Exp test;
-  public StmtList exps;
-  public StmtWhile(int pos, Exp test, StmtList exps) {
+  public Stmt stmt;
+  public StmtWhile(int pos, Exp test, Stmt stmt) {
     this.pos = pos;
     this.test = test;
-    this.exps = exps;
+    this.stmt = stmt;
   }
 }

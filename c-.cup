@@ -118,10 +118,16 @@ precedence left ELSE;
   declar_list ::= declar_list:d1 declar:d2
                   {:
                     DeclarList t = d1;
-                    while(t.tail != null)
-                      t = t.tail;
-                    t.tail = new DeclarList(d2, null);
-                    RESULT = d1;
+                    if (d1 == null) {
+                      d1 = new DeclarList(d2, null);
+                      RESULT = d1;
+                    }
+                    else{
+                      while(t.tail != null)
+                        t = t.tail;
+                      t.tail = new DeclarList(d2, null);
+                      RESULT = d1;
+                    }
                   :}
                   | declar:d
                   {:
@@ -154,11 +160,11 @@ precedence left ELSE;
   // type-specifier --> int | void
   type        ::= INT:i
                   {:
-                    RESULT = new TypeSpec(ileft, i.toString());
+                    RESULT = new TypeSpec(ileft, "int");
                   :}
                   | VOID:v
                   {:
-                    RESULT = new TypeSpec(vleft, v.toString());
+                    RESULT = new TypeSpec(vleft, "void");
                   :}
                   ;
 
@@ -184,10 +190,16 @@ precedence left ELSE;
   param_list  ::= param_list:p1 COMMA param:p2
                   {:
                     ParamList t = p1;
-                    while(t.tail != null)
-                      t = t.tail;
-                    t.tail = new ParamList(p2, null);
-                    RESULT = p1;
+                    if (p1 == null) {
+                      p1 = new ParamList(p2, null);
+                      RESULT = p1;
+                    }
+                    else{
+                      while(t.tail != null)
+                        t = t.tail;
+                      t.tail = new ParamList(p2, null);
+                      RESULT = p1;
+                    }
                   :}
                   | param:p
                   {:
@@ -217,10 +229,16 @@ precedence left ELSE;
   loc_declar  ::= loc_declar:d1 var_declar:d2
                   {:
                     DeclarListLocal t = d1;
-                    while(t.tail != null)
-                      t = t.tail;
-                    t.tail = new DeclarListLocal(d2, null);
-                    RESULT = d1;
+                    if (d1 == null) {
+                      d1 = new DeclarListLocal(d2, null);
+                      RESULT = d1;
+                    }
+                    else{
+                      while(t.tail != null)
+                        t = t.tail;
+                      t.tail = new DeclarListLocal(d2, null);
+                      RESULT = d1;
+                    }
                   :}
                   | //empty
                   ;
@@ -229,10 +247,16 @@ precedence left ELSE;
   stmt_list   ::= stmt_list:s1 stmt:s2
                   {:
                     StmtList t = s1;
-                    while(t.tail != null)
-                      t = t.tail;
-                    t.tail = new StmtList(s2, null);
-                    RESULT = s1;
+                    if (s1 == null) {
+                      s1 = new StmtList(s2, null);
+                      RESULT = s1;
+                    }
+                    else{
+                      while(t.tail != null)
+                        t = t.tail;
+                      t.tail = new StmtList(s2, null);
+                      RESULT = s1;
+                    }
                   :}
                   | //empty
                   ;
@@ -275,7 +299,6 @@ precedence left ELSE;
                   {:
                     RESULT = new StmtSelect(ileft, e, s, null);
                   :}
-                  
                   | IF:i LPAREN exp:e RPAREN stmt:s1 ELSE stmt:s2
                   {:
                     RESULT = new StmtSelect(ileft, e, s1, s2);
@@ -286,7 +309,7 @@ precedence left ELSE;
   // iteration-stmt --> while ( expression ) statement
   iter_stmt   ::= WHILE:w LPAREN exp:e RPAREN stmt:s
                   {:
-                    //
+                    RESULT = new StmtWhile(wleft, e, s);
                   :}
                   ;
 
@@ -411,10 +434,16 @@ precedence left ELSE;
   arg_list    ::= arg_list:a COMMA exp:e
                   {:
                     ExpList t = a;
-                    while(t.tail != null)
-                      t = t.tail;
-                    t.tail = new ExpList(e, null);
-                    RESULT = a;
+                    if (a == null) {
+                      a = new ExpList(e, null);
+                      RESULT = a;
+                    }
+                    else{
+                      while(t.tail != null)
+                        t = t.tail;
+                      t.tail = new ExpList(e, null);
+                      RESULT = a;
+                    }
                   :}
                   | exp:e
                   {:

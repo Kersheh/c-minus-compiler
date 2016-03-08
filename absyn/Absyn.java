@@ -99,10 +99,10 @@ abstract public class Absyn {
       showTree((StmtExp)tree, spaces);
     else if(tree instanceof StmtSelect)
       showTree((StmtSelect)tree, spaces);
-    //else if(tree instanceof StmtWhile)
-    //  showTree((StmtWhile)tree, spaces);
-    else if(tree instanceof StmtReturn)
+    else if(tree instanceof StmtWhile)
       showTree((StmtWhile)tree, spaces);
+    else if(tree instanceof StmtReturn)
+      showTree((StmtReturn)tree, spaces);
     else {
       indent(spaces);
       System.out.println("Illegal statement at line " + tree.pos);
@@ -130,14 +130,28 @@ abstract public class Absyn {
     spaces += SPACES;
     showTree(tree.test, spaces);
     showTree(tree.then_stmt, spaces);
-    showTree(tree.else_stmt, spaces);
+    if (tree.else_stmt != null)
+      showTree(tree.else_stmt, spaces);
+  }
+
+  static private void showTree(StmtWhile tree, int spaces) {
+    indent(spaces);
+    System.out.println("StmtWhile:");
+    spaces += SPACES;
+    showTree(tree.test, spaces);
+    showTree(tree.stmt, spaces);
   }
 
   static private void showTree(StmtReturn tree, int spaces) {
     indent(spaces);
     System.out.println("StmtReturn:");
     spaces += SPACES;
-    showTree(tree.item, spaces);
+    if (tree.item != null)
+      showTree(tree.item, spaces);
+    else{
+      indent(spaces);
+      System.out.println("No Return Value");
+    }
   }
 
   static public void showTree(Exp tree, int spaces) {
@@ -169,7 +183,8 @@ abstract public class Absyn {
     indent(spaces);
     System.out.println("ExpCall: " + tree.id);
     spaces += SPACES;
-    showTree(tree.args, spaces);
+    if(tree.args != null)
+      showTree(tree.args, spaces);
   }
 
   static private void showTree(ExpConst tree, int spaces) {
@@ -182,7 +197,7 @@ abstract public class Absyn {
     if(tree.exp == null)
       System.out.println("ExpVar: " + tree.name);
     else{
-      System.out.println("ExpVar: " + tree.name);
+      System.out.println("ExpVar: " + tree.name + "[]");
       spaces += SPACES;
       showTree(tree.exp, spaces);
     }
@@ -191,6 +206,45 @@ abstract public class Absyn {
   static private void showTree(ExpOp tree, int spaces) {
     indent(spaces);
     System.out.println("ExpOp: ");
+    spaces += SPACES;
+    showTree(tree.left, spaces);
+    indent(spaces);
+    System.out.print("Operator: ");
+    switch(tree.op) {
+      case ExpOp.PLUS:
+        System.out.println(" + ");
+        break;
+      case ExpOp.MINUS:
+        System.out.println(" - ");
+        break;
+      case ExpOp.TIMES:
+        System.out.println(" * ");
+        break;
+      case ExpOp.OVER:
+        System.out.println(" / ");
+        break;
+      case ExpOp.LT:
+        System.out.println(" < ");
+        break;
+      case ExpOp.LTEQ:
+        System.out.println(" <= ");
+        break;
+      case ExpOp.GT:
+        System.out.println(" > ");
+        break;
+      case ExpOp.GTEQ:
+        System.out.println(" >= ");
+        break;
+      case ExpOp.EQ:
+        System.out.println(" == ");
+        break;
+      case ExpOp.NOTEQ:
+        System.out.println(" != ");
+        break;
+      default:
+        System.out.println("Unrecognized operator at line " + tree.pos);
+    }
+    showTree(tree.right, spaces);
   }
 
 
