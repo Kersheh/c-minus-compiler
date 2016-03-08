@@ -151,7 +151,7 @@ precedence left ELSE;
                   {:
                     RESULT = new DeclarVar(tleft, t, i, false);
                   :}
-                  | type:t ID:i RBRACKET NUM:n LBRACKET SEMI
+                  | type:t ID:i LBRACKET NUM:n RBRACKET SEMI
                   {:
                     RESULT = new DeclarVar(tleft, t, i, true);
                   :}
@@ -212,7 +212,7 @@ precedence left ELSE;
                   {:
                     RESULT = new Param(tleft, t, i, false);
                   :}
-                  | type:t ID:i RBRACKET LBRACKET
+                  | type:t ID:i LBRACKET RBRACKET 
                   {:
                     RESULT = new Param(tleft, t, i, true);
                   :}
