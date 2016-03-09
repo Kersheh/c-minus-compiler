@@ -13,3 +13,7 @@ To scan/parse C-Minus source code with optional abstract syntax tree -a, run:
 
 To run the test suite of sample C-Minus programs, run:
   $ make test
+
+To run the test suite of sample C-Minus programs with the abstract syntax tree, 
+run:
+  $ make test_tree
