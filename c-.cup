@@ -16,6 +16,8 @@ parser code {:
 
     public String flag = "";
 
+    public boolean errors = false;
+
     public parser(String arg, java_cup.runtime.Scanner s){
       super(s);
       this.flag = arg;
@@ -26,6 +28,7 @@ parser code {:
        reason for the error which is passed into the method in the
        String 'message'. */
     public void report_error(String message, Object info) {
+        this.errors = true;
    
         /* Create a StringBuffer called 'm' with the string 'Error' in it. */
         StringBuffer m = new StringBuffer("Error");
@@ -105,7 +108,7 @@ non terminal Integer binary_op;
 
 precedence nonassoc RETURN;
 precedence right ASSIGN;
-precedence left LT, LTEQ, GT, GTEQ, EQ, NOTEQ;
+precedence left LT, LTEQ, GT, GTEQ, EQ, NOTEQ; //make nonassoc
 precedence left PLUS, MINUS;
 precedence left TIMES, OVER;
 precedence left ELSE;
@@ -116,7 +119,7 @@ precedence left ELSE;
   program     ::= declar_list:d
                   {:
                     RESULT = d;
-                    if ("-a".equals(this.parser.flag)) {
+                    if ("-a".equals(this.parser.flag) && !this.parser.errors) {
                       System.out.println("The abstract syntax tree is:");
                       Absyn.showTree(RESULT, 0);
                     } else {
@@ -188,7 +191,15 @@ precedence left ELSE;
                   {:
                     RESULT = new DeclarFun(tleft, t, i, p, c);
                   :}
-                  | error:e
+                  | error:e LPAREN params:p RPAREN comp_stmt:c
+                  {:
+                    parser.report_error("Invalid function declaration", e);
+                  :}
+                  | type:t ID:i LPAREN error:e RPAREN comp_stmt:c
+                  {:
+                    parser.report_error("Invalid function declaration", e);
+                  :}
+                  | type:t ID:i LPAREN params:p RPAREN error:e
                   {:
                     parser.report_error("Invalid function declaration", e);
                   :}
