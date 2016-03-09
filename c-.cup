@@ -104,7 +104,6 @@ non terminal ExpList args, arg_list;
 non terminal Exp exp, factor;
 non terminal ExpVar var;
 non terminal ExpCall call;
-non terminal Integer binary_op;
 
 precedence nonassoc RETURN;
 precedence right ASSIGN;
