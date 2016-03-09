@@ -86,8 +86,7 @@ terminal PLUS, MINUS, TIMES, OVER, LT, LTEQ, GT, GTEQ, EQ, NOTEQ, ASSIGN;
 terminal SEMI, COMMA, LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 /* Other tokens */
 terminal String ID, NUM;
-terminal ERROR;
-   
+
 non terminal DeclarList program, declar_list;
 non terminal Declar declar;
 non terminal DeclarVar var_declar;

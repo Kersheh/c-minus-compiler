@@ -106,4 +106,4 @@ Comment   = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 {number}           { return symbol(sym.NUM, yytext()); }
 {WhiteSpace}*      { /* skip whitespace */ }   
 {Comment}          { /* skip comment */ }
-.                  { return symbol(sym.ERROR); }
+.                  { return symbol(sym.error); }
