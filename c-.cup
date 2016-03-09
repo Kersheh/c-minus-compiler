@@ -113,6 +113,7 @@ precedence left PLUS, MINUS;
 precedence left TIMES, OVER;
 precedence left ELSE;
 
+
 /* ----------------------------Grammar Section-------------------- */
   
   // program --> declaration-list
@@ -169,7 +170,7 @@ precedence left ELSE;
                   {:
                     RESULT = new DeclarVar(tleft, t, i, true);
                   :}
-                  | error:e
+                  | error:e SEMI
                   {:
                     parser.report_error("Invalid variable declaration", e);
                   :}
@@ -363,9 +364,45 @@ precedence left ELSE;
                   {:
                     RESULT = new ExpAssign(vleft, v, e);
                   :}
-                  | exp:e1 binary_op:bop exp:e2
+                  | exp:e1 PLUS exp:e2
                   {:
-                    RESULT = new ExpOp(e1left, e1, bop, e2);
+                    RESULT = new ExpOp(e1left, e1, ExpOp.PLUS, e2);
+                  :}
+                  | exp:e1 MINUS exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.MINUS, e2);
+                  :}
+                  | exp:e1 TIMES exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.TIMES, e2);
+                  :}
+                  | exp:e1 OVER exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.OVER, e2);
+                  :}
+                  | exp:e1 LTEQ exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.LTEQ, e2);
+                  :}
+                  | exp:e1 LT exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.LT, e2);
+                  :}
+                  | exp:e1 GT exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.GT, e2);
+                  :}
+                  | exp:e1 GTEQ exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.GTEQ, e2);
+                  :}
+                  | exp:e1 EQ exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.EQ, e2);
+                  :}
+                  | exp:e1 NOTEQ exp:e2
+                  {:
+                    RESULT = new ExpOp(e1left, e1, ExpOp.NOTEQ, e2);
                   :}
                   | factor:f
                   {:
@@ -381,49 +418,6 @@ precedence left ELSE;
                   | ID:i LBRACKET exp:e RBRACKET
                   {:
                     RESULT = new ExpVar(ileft, i, e);
-                  :}
-                  ;
-
-  // binary_op --> + | - | * | / <= | < | > | >= | == | !=
-  binary_op   ::= PLUS 
-                  {:
-                    RESULT = ExpOp.PLUS;
-                  :}
-                  | MINUS
-                  {:
-                    RESULT = ExpOp.MINUS;
-                  :}
-                  | TIMES
-                  {:
-                    RESULT = ExpOp.TIMES;
-                  :}
-                  | OVER
-                  {:
-                    RESULT = ExpOp.OVER;
-                  :}
-                  | LTEQ
-                  {:
-                    RESULT = ExpOp.LTEQ;
-                  :}
-                  | LT
-                  {:
-                    RESULT = ExpOp.LT;
-                  :}
-                  | GT
-                  {:
-                    RESULT = ExpOp.GT;
-                  :}
-                  | GTEQ
-                  {:
-                    RESULT = ExpOp.GTEQ;
-                  :}
-                  | EQ
-                  {:
-                    RESULT = ExpOp.EQ;
-                  :}
-                  | NOTEQ
-                  {:
-                    RESULT = ExpOp.NOTEQ;
                   :}
                   ;
 

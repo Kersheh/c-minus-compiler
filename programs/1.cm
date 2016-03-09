@@ -11,6 +11,7 @@ int largest(int a, int b, int c) {
   result = a;
   if(b > result) result = b;
   if(c > result) result = c;
+  result = 1 - 2/3 * 4;
   return result;
 }
 
