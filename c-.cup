@@ -14,13 +14,13 @@ import absyn.*;
    line and column number of the error). */
 parser code {:
 
-    public String flag = "";
+    public boolean[] args; // [0] is -a, [1] is -s
 
     public boolean errors = false;
 
-    public parser(String arg, java_cup.runtime.Scanner s){
+    public parser(boolean[] args, java_cup.runtime.Scanner s){
       super(s);
-      this.flag = arg;
+      this.args = args;
     }
     
     /* Change the method report_error so it will display the line and
@@ -118,12 +118,18 @@ precedence left ELSE;
   program     ::= declar_list:d
                   {:
                     RESULT = d;
-                    if ("-a".equals(this.parser.flag) && !this.parser.errors) {
-                      System.out.println("The abstract syntax tree is:");
-                      Absyn.showTree(RESULT, 0);
-                    } else {
-                      System.out.println("Parse complete");
+                    if(!this.parser.errors) {
+                      // print abstract syntax tree
+                      if(this.parser.args[0] == true) {
+                        System.out.println("The abstract syntax tree is:");
+                        Absyn.showTree(RESULT, 0);
+                      }
+                      // print symbol tables
+                      if(this.parser.args[1] == true) {
+                        System.out.println("");
+                      }
                     }
+                    System.out.println("Parse complete");
                   :}
                   ;
 
