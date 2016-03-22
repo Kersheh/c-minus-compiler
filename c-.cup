@@ -9,6 +9,7 @@
 /* ----------------------Preliminary Declarations Section--------------------*/
 
 import absyn.*;
+import symb.*;
    
 /* Parser code to change the way the parser reports errors (include
    line and column number of the error). */
@@ -18,7 +19,7 @@ parser code {:
 
     public boolean errors = false;
 
-    public parser(boolean[] args, java_cup.runtime.Scanner s){
+    public parser(boolean[] args, java_cup.runtime.Scanner s) {
       super(s);
       this.args = args;
     }
@@ -126,7 +127,7 @@ precedence left ELSE;
                       }
                       // print symbol tables
                       if(this.parser.args[1] == true) {
-                        System.out.println("");
+                        SymbolTable.showTable();
                       }
                     }
                     System.out.println("Parse complete");
