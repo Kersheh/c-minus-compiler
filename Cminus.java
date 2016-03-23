@@ -6,6 +6,7 @@
 */
    
 import java.io.*;
+import java.util.*;
    
 class Cminus {
   /* terminal argument error readout */
@@ -17,7 +18,7 @@ class Cminus {
 
   static public void main(String args[]) {
     String filename;
-    boolean[] args_bool = new boolean[2]; // [0] is -a, [1] is -s
+    List<String> args_list = new ArrayList<String>();
 
     /* validate number of arguments */
     if(args.length > 3) {
@@ -32,8 +33,8 @@ class Cminus {
         argsError();
         return;
       }
-      if(args[i].equals("-a")) args_bool[0] = true;
-      if(args[i].equals("-s")) args_bool[1] = true;
+      if(args[i].equals("-a")) args_list.add("-a");
+      if(args[i].equals("-s")) args_list.add("-s");
     }
     /* set filename */
     filename = args[args.length - 1];
@@ -51,7 +52,7 @@ class Cminus {
     }
     /* execute parser */
     try {
-      parser p = new parser(args_bool, new Lexer(new FileReader(filename)));
+      parser p = new parser(args_list, new Lexer(new FileReader(filename)));
       Object result = p.parse().value;      
     } catch(Exception e) {
       e.printStackTrace();
