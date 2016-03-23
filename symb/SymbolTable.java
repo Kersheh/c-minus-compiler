@@ -3,9 +3,11 @@ import java.util.Hashtable;
 
 public class SymbolTable {
   public Hashtable<String, Symbol> table;
+  public SymbolTable parentTable;
 
-  public SymbolTable(int size) {
+  public SymbolTable(int size, SymbolTable parent) {
     this.table = new Hashtable<String, Symbol>(size);
+    this.parentTable = parent;
   }
 
   public void addSymbol(String key, Symbol symb) {
