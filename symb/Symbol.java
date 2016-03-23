@@ -26,6 +26,7 @@ public class Symbol {
   public void setValue(int val, int pos) {
     if(this.constant)
       System.out.println("Assignment to constant variable at line " + pos);
-    else this.value = val;
+    else 
+      this.value = val;
   }
 }
