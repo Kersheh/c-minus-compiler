@@ -1,0 +1,30 @@
+/*
+  Source: Created by: Matt Breckon and Dean Way
+  File name: 6.cm
+  A program designed to explicitly test levels of scope for the symbol table.
+  -- This program compiles without errors.
+*/
+
+int x; int y;
+
+void foo(int z) {
+  int x;
+  x = 0;
+  if(x == 0) {
+    int y;
+    y = 0;
+  }
+  return;
+}
+
+int x(void) {
+  y = 1;
+  return;
+}
+
+void main(void) {
+  int x; int y;
+  x = 2;
+  foo(x);
+  x();
+}
