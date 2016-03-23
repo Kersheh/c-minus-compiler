@@ -6,14 +6,17 @@ To build and compile the project, run:
 Makefile builds the scanner file c-.flex using the JFlex lexer/scanner 
 generator for Java, builds the parser file c-.cup using the CUP LALR(1) parser 
 generator for Java along with the abstract syntax tree Java files found in the 
-directory /absyn, and finally compiles the C-Minus Main Java file.
+directory /absyn and the symbol table Java files found in the directory /symb, 
+and finally compiles the C-Minus Main Java file.
 
-To scan/parse C-Minus source code with optional abstract syntax tree -a, run: 
-  $ java -classpath ./java/cup.jar:. C- [-a] [file_name.cm]
+To scan/parse C-Minus source code with optional arguments, run: 
+  $ java -classpath ./java/cup.jar:. C- [-a] [-s] [file_name.cm]
 
 To run the test suite of sample C-Minus programs, run:
   $ make test
 
 To run the test suite of sample C-Minus programs with the abstract syntax tree, 
-run:
-  $ make test_tree
+symbal tables, or both, run:
+  (1) $ make test_tree
+  (2) $ make test_table
+  (3) $ make test_all

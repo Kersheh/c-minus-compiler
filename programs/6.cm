@@ -7,7 +7,7 @@
 
 int x; int y;
 
-void foo(void) {
+void foo(int z) {
   int x;
   x = 0;
   if(x == 0) {
@@ -17,13 +17,14 @@ void foo(void) {
   return;
 }
 
-int x(int y) {
+int x(void) {
   y = 1;
   return;
 }
 
 void main(void) {
   int x; int y;
-  foo();
-  x(x);
+  x = 2;
+  foo(x);
+  x();
 }
