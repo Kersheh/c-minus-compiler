@@ -1,17 +1,27 @@
 package symb;
 import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Stack;
 
 public class SymbolTable {
 
-  private Stack<HashMap<List<String>, Symbol>> tableStack = new Stack<>();
+  private Deque<HashMap<List<String>, Symbol>> tableStack = new ArrayDeque<>();
   private final static int SPACES = 4;
+  private static SymbolTable instance = null;
 
-  public SymbolTable() {
+  private SymbolTable() {
     tableStack.push(new LinkedHashMap<>());
+  }
+
+  public static SymbolTable getInstance(){
+    if (SymbolTable.instance == null){
+      SymbolTable.instance = new SymbolTable();
+    }
+    return SymbolTable.instance;
   }
 
   public void newScope(){
@@ -19,6 +29,9 @@ public class SymbolTable {
   }
 
   public void leaveScope(){
+    if(this.tableStack.size() <= 1){
+      return;
+    }
     this.tableStack.pop();
   }
 
@@ -29,6 +42,9 @@ public class SymbolTable {
     }
     List<String> key = Arrays.asList(symb.getId(), symb.getType());
     HashMap<List<String>, Symbol> top = this.tableStack.peek();
+    if(top == null){
+      throw new RuntimeException();
+    }
     if (top.get(key) == null){
       top.put(key, symb);
     } else {
@@ -38,12 +54,38 @@ public class SymbolTable {
 
   public boolean validSymbolInScope(Symbol symb){
     List<String> key = Arrays.asList(symb.getId(), symb.getType());
-    for (HashMap table : this.tableStack){
-      if (table.get(key) != null){
+    for(HashMap<List<String>, Symbol> table : this.tableStack){
+      if (table.get(key) != null && sameType(table.get(key), symb)){
         return true;
       }
     }
     return false;
+  }
+
+  private boolean sameType(Symbol decl, Symbol use){
+    if(decl == null || use == null || decl.getId() != use.getId()
+        || decl.getType() != use.getType() || decl.getClass() != use.getClass()){
+      return false;
+    }
+
+    if(decl.getClass() == SymbolFunction.class){
+      SymbolFunction tempDecl = (SymbolFunction)decl;
+      SymbolFunction tempUse = (SymbolFunction)use;
+      if((tempDecl.getParameters() != null  && tempUse.getParameters() == null)
+        || (tempDecl.getParameters() == null  && tempUse.getParameters() != null)
+        || tempDecl.getParameters().size() != tempUse.getParameters().size()){
+        return false;
+      }
+      Iterator declIter = tempDecl.getParameters().iterator();
+      Iterator useIter = tempUse.getParameters().iterator();
+      while(declIter.hasNext() && useIter.hasNext()){
+        if (declIter.next().getClass() != useIter.next().getClass()){
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   static private void indent(int spaces) {
