@@ -1,7 +1,16 @@
 package symb;
+import java.util.Hashtable;
 
-abstract public class SymbolTable {
-  public int pos;
+public class SymbolTable {
+  public Hashtable<String, Symbol> table;
+
+  public SymbolTable(int size) {
+    this.table = new Hashtable<String, Symbol>(size);
+  }
+
+  public void addSymbol(String key, Symbol symb) {
+    this.table.put(key, symb);
+  }
 
   final static int SPACES = 4;
 
