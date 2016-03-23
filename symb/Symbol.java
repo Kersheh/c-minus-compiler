@@ -1,32 +1,23 @@
 package symb;
 
-public class Symbol {
-  Boolean constant;
-  SymbolType type;
-  String id;
-  int value;
+public abstract class Symbol {
+  private String id;
+  private int address;
+  public static final String INT_TYPE = "INT";
+  public static final String FUNC_TYPE = "FUNC";
 
-  static public enum SymbolType {
-    INT, VOID
-  }
-
-  public Symbol(SymbolType type, String id) {
-    this.constant = false;
-    this.type = type;
+  public Symbol(String id, int address) {
     this.id = id;
+    this.address = address;
   }
 
-  public Symbol(Boolean constant, SymbolType type, String id, int val) {
-    this.constant = constant;
-    this.type = type;
-    this.id = id;
-    this.value = val;
+  public String getId(){
+  	return this.id;
   }
 
-  public void setValue(int val, int pos) {
-    if(this.constant)
-      System.out.println("Assignment to constant variable at line " + pos);
-    else 
-      this.value = val;
+  public int getAddress(){
+  	return this.address;
   }
+
+  abstract public String getType();
 }
