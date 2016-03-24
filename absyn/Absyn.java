@@ -170,7 +170,7 @@ abstract public class Absyn {
       showTree((ExpVar)tree, spaces);
     else {
       indent(spaces);
-      System.out.println("Illegal expression at line " + tree.pos);
+      System.out.println("Illegal expression at line " + (tree.pos + 1));
     }
   }
 
@@ -245,7 +245,7 @@ abstract public class Absyn {
         System.out.println(" != ");
         break;
       default:
-        System.out.println("Unrecognized operator at line " + tree.pos);
+        System.out.println("Unrecognized operator at line " + (tree.pos + 1));
     }
     showTree(tree.right, spaces);
   }
