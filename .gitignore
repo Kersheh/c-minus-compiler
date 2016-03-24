@@ -6,3 +6,6 @@ sym.java
 absyn/*.class
 *~
 *.docx
+.idea
+.idea/*
+*.iml
