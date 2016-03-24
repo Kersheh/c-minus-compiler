@@ -314,6 +314,20 @@ public class SymbolTable {
   //
   private void showTable(ExpAssign tree, int spaces) {
     showTable(tree.lhs, spaces);
+    if(tree.rhs instanceof ExpCall){
+      ExpCall call = (ExpCall) tree.rhs;
+      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      try {
+        SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
+        if (TypeSpec.VOID.equals(match.getReturnType())){
+          indent(spaces);
+          System.out.println("Error: " + match.getId() + " of type VOID used in an assignment requiring type INT on line "
+                  + tree.pos);
+        }
+      } catch (Exception e) {
+        //Do nothing
+      }
+    }
     showTable(tree.rhs, spaces);
   }
 
@@ -348,6 +362,21 @@ public class SymbolTable {
       catch(Exception e) {
         indent(spaces);
         System.out.println(e.getMessage() + ": on line " + tree.pos);
+      }
+
+      if(tree.exp instanceof ExpCall){
+        ExpCall call = (ExpCall) tree.exp;
+        Symbol symb = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+        try {
+          SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(symb);
+          if (TypeSpec.VOID.equals(match.getReturnType())){
+            indent(spaces);
+            System.out.println("Error: " + match.getId() + " of type VOID used in array indexing requiring type INT on line "
+                    + tree.pos);
+          }
+        } catch (Exception e) {
+          //Do nothing
+        }
       }
       showTable(tree.exp, spaces);
     }
