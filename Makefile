@@ -52,4 +52,4 @@ test_table:
 	done
 
 clean:
-	rm -f parser.java Lexer.java sym.java *.class absyn/*.class symb/*.class *~
+	rm -f parser.java Lexer.java sym.java *.class absyn/*.class symb/*.class symb/exceptions/*.class *~
