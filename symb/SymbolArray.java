@@ -19,7 +19,7 @@ public class SymbolArray extends SymbolInt {
 
   @Override
   public String toString() {
-    String s = "int " + this.id + "[" + this.size + "]";
+    String s = "int " + this.getId() + "[" + this.size + "]";
     return s;
   }
 }

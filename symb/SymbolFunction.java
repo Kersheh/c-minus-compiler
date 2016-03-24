@@ -27,7 +27,7 @@ public class SymbolFunction extends Symbol {
 
   @Override
   public String toString(){
-    String s = this.returnType + " Function " + this.id + " (";
+    String s = this.returnType + " Function " + this.getId() + " (";
     for(SymbolInt i : this.parameters){
       s = s + " " + i.toString();
     }
