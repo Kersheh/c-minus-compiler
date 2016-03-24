@@ -1,11 +1,17 @@
 /*
   Source: Fei Song
   File name: 7.cm
-  First program from checkpoint 2's marking scheme.
+  First program modified from checkpoint 2's marking scheme.
 */
 
+void foo(int x) {
+  int y;
+}
+
 void main(void) {
-  int a[2]; int x; int y;
+  int a[2]; int x;
+  x = 0;
   a[x] = 1;
-  a[y] = 2;
+  a[foo(x)] = 2;
+  a[foo(x) + x] = 2;
 }
