@@ -133,9 +133,14 @@ public class SymbolTable {
   }
 
   public void printScope(int spaces){
-    for(Symbol s : this.tableStack.peek().values()){
+    if(this.tableStack.peek().isEmpty()) {
       indent(spaces);
-      System.out.println(s);
+      System.out.println("No variables defined");
+    } else {
+      for(Symbol s : this.tableStack.peek().values()){
+        indent(spaces);
+        System.out.println(s);
+      }
     }
   }
 
