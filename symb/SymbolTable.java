@@ -189,7 +189,7 @@ public class SymbolTable {
       return;
     }
     if (tree.array){
-      Symbol s = new SymbolArray(tree.name, 0);
+      Symbol s = new SymbolArray(tree.name, 0, tree.size);
       if(!this.addSymbol(s)){
         indent(spaces);
         System.out.println("Variable redefinition error on line " + tree.pos);
