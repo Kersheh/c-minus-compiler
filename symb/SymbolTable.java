@@ -64,8 +64,8 @@ public class SymbolTable {
   }
 
   private boolean sameType(Symbol decl, Symbol use){
-    if(decl == null || use == null || decl.getId() != use.getId()
-        || decl.getType() != use.getType() || decl.getClass() != use.getClass()){
+    if(decl == null || use == null || !decl.getId().equals(use.getId())
+        || !decl.getType().equals(use.getType()) || decl.getClass() != use.getClass()){
       return false;
     }
 
@@ -73,15 +73,19 @@ public class SymbolTable {
       SymbolFunction tempDecl = (SymbolFunction)decl;
       SymbolFunction tempUse = (SymbolFunction)use;
       if((tempDecl.getParameters() != null  && tempUse.getParameters() == null)
-        || (tempDecl.getParameters() == null  && tempUse.getParameters() != null)
-        || tempDecl.getParameters().size() != tempUse.getParameters().size()){
+        || (tempDecl.getParameters() == null  && tempUse.getParameters() != null)){
         return false;
       }
-      Iterator declIter = tempDecl.getParameters().iterator();
-      Iterator useIter = tempUse.getParameters().iterator();
-      while(declIter.hasNext() && useIter.hasNext()){
-        if (declIter.next().getClass() != useIter.next().getClass()){
+      if(tempDecl.getParameters() != null && tempUse.getParameters() != null){
+        if (tempDecl.getParameters().size() != tempUse.getParameters().size()){
           return false;
+        }
+        Iterator declIter = tempDecl.getParameters().iterator();
+        Iterator useIter = tempUse.getParameters().iterator();
+        while(declIter.hasNext() && useIter.hasNext()){
+          if (declIter.next().getClass() != useIter.next().getClass()){
+            return false;
+          }
         }
       }
     }
@@ -105,6 +109,8 @@ public class SymbolTable {
       showTable(tree.head, spaces);
       tree = tree.tail;
     }
+    System.out.println("Global scope at end of parse:");
+    spaces += SPACES;
     this.printScope(spaces);
   }
 
@@ -168,6 +174,9 @@ public class SymbolTable {
   }
 
   private void showTable(DeclarFun tree, int spaces) {
+    spaces += SPACES;
+    indent(spaces);
+    System.out.println("Local scope at " + tree.name +  ":");
     Symbol s = new SymbolFunction(tree.name, 0, null);
     if(!this.addSymbol(s)){
       indent(spaces);
@@ -207,6 +216,8 @@ public class SymbolTable {
   //
   private void showTable(Stmt tree, int spaces) {
     if(tree instanceof StmtComp){
+      indent(spaces);
+      System.out.println("Local block:");
       this.newScope();
       spaces += SPACES;
       showTable((StmtComp)tree, spaces);
@@ -270,7 +281,6 @@ public class SymbolTable {
       showTable((ExpVar)tree, spaces);
   }
 
-  //
   private void showTable(ExpAssign tree, int spaces) {
     showTable(tree.lhs, spaces);
     showTable(tree.rhs, spaces);
@@ -278,14 +288,31 @@ public class SymbolTable {
 
   //
   private void showTable(ExpCall tree, int spaces) {
+    Symbol s = new SymbolFunction(tree.id, 0, null);
+    if(!this.validSymbolInScope(s)){
+      indent(spaces);
+      System.out.println("Error: Use of undeclared function on line " + tree.pos);
+    }
     if(tree.args != null)
       showTable(tree.args, spaces);
   }
 
   //
   private void showTable(ExpVar tree, int spaces) {
-    if(tree.exp != null)
+    if(tree.exp == null) { //normal variable
+      Symbol s = new SymbolInt(tree.name, 0);
+      if(!this.validSymbolInScope(s)){
+        indent(spaces);
+        System.out.println("Error: Use of undeclared variable on line " + tree.pos);
+      }
       showTable(tree.exp, spaces);
+    } else { //array variable
+      Symbol s = new SymbolArray(tree.name, 0);
+      if(!this.validSymbolInScope(s)){
+        indent(spaces);
+        System.out.println("Error: Use of undeclared variable on line " + tree.pos);
+      }
+    }
   }
 
   //
