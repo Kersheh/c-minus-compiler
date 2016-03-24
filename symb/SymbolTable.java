@@ -268,10 +268,6 @@ public class SymbolTable {
       showTable((ExpOp)tree, spaces);
     else if(tree instanceof ExpVar)
       showTable((ExpVar)tree, spaces);
-    else {
-      indent(spaces);
-      System.out.println("Illegal expression at line " + tree.pos);
-    }
   }
 
   //
