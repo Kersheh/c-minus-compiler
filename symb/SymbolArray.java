@@ -16,4 +16,10 @@ public class SymbolArray extends SymbolInt {
   public int getSize(){
     return this.size;
   }
+
+  @Override
+  public String toString() {
+    String s = "int " + this.id + "[" + this.size + "]";
+    return s;
+  }
 }
