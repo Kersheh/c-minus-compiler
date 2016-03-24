@@ -1,5 +1,5 @@
 /*
-  Source: Created by: Matt Breckon and Dean Way
+  Created by: Matt Breckon and Dean Way
   File name: 6.cm
   A program designed to explicitly test levels of scope for the symbol table.
   -- This program compiles without errors.
