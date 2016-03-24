@@ -24,4 +24,15 @@ public class SymbolFunction extends Symbol {
   public List<SymbolInt> getParameters(){
     return this.parameters;
   }
+
+  @Override
+  public String toString(){
+    String s = this.returnType + " Function " + this.id + " (";
+    for(SymbolInt i : this.parameters){
+      s = s + " " + i.toString();
+    }
+    s = s + " )";
+    return s;
+  }
+
 }
