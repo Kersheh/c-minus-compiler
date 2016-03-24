@@ -105,6 +105,7 @@ public class SymbolTable {
       showTable(tree.head, spaces);
       tree = tree.tail;
     }
+    this.printScope(spaces);
   }
 
   public void showTable(DeclarListLocal tree, int spaces) {
