@@ -188,7 +188,6 @@ public class SymbolTable {
   }
 
   private void showTable(Param tree, int spaces) {
-    indent(spaces);
     if (tree.array) {
       Symbol s = new SymbolArray(tree.id, 0);
       if(!this.addSymbol(s)){
