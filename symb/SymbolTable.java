@@ -16,6 +16,10 @@ public class SymbolTable {
 
   private SymbolTable() {
     tableStack.push(new LinkedHashMap<>());
+    Symbol input = new SymbolFunction("input", 0, null);
+    Symbol output = new SymbolFunction("output", 0, null);
+    this.addSymbol(input);
+    this.addSymbol(output);
   }
 
   public static SymbolTable getInstance(){
