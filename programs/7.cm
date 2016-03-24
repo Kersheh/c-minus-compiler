@@ -5,7 +5,7 @@
 */
 
 void main(void) {
-  int a[2]; int x; void y;
+  int a[2]; int x; int y;
   a[x] = 1;
   a[y] = 2;
 }
