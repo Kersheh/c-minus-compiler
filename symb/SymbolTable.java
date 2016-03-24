@@ -16,8 +16,8 @@ public class SymbolTable {
 
   private SymbolTable() {
     tableStack.push(new LinkedHashMap<>());
-    Symbol input = new SymbolFunction("input", 0, null);
-    Symbol output = new SymbolFunction("output", 0, null);
+    Symbol input = new SymbolFunction("input", 0, null, TypeSpec.INT);
+    Symbol output = new SymbolFunction("output", 0, null, TypeSpec.VOID);
     this.addSymbol(input);
     this.addSymbol(output);
   }
@@ -65,6 +65,16 @@ public class SymbolTable {
       }
     }
     return false;
+  }
+
+  public Symbol getMatchingSymbol(Symbol symb){
+    List<String> key = Arrays.asList(symb.getId(), symb.getType());
+    for(HashMap<List<String>, Symbol> table : this.tableStack){
+      if (table.get(key) != null && sameType(table.get(key), symb)){
+        return table.get(key);
+      }
+    }
+    return null;
   }
 
   private boolean sameType(Symbol decl, Symbol use){
@@ -181,7 +191,7 @@ public class SymbolTable {
     spaces += SPACES;
     indent(spaces);
     System.out.println("Local scope at " + tree.name +  ":");
-    Symbol s = new SymbolFunction(tree.name, 0, null);
+    Symbol s = new SymbolFunction(tree.name, 0, null, tree.type.type);
     if(!this.addSymbol(s)){
       indent(spaces);
       System.out.println("Function redefinition error");
@@ -292,7 +302,7 @@ public class SymbolTable {
 
   //
   private void showTable(ExpCall tree, int spaces) {
-    Symbol s = new SymbolFunction(tree.id, 0, null);
+    Symbol s = new SymbolFunction(tree.id, 0, null, null);
     if(!this.validSymbolInScope(s)){
       indent(spaces);
       System.out.println("Error: Use of undeclared function on line " + tree.pos);
@@ -309,14 +319,24 @@ public class SymbolTable {
         indent(spaces);
         System.out.println("Error: Use of undeclared variable on line " + tree.pos);
       }
-      showTable(tree.exp, spaces);
     } else { //array variable
       Symbol s = new SymbolArray(tree.name, 0);
       if(!this.validSymbolInScope(s)){
         indent(spaces);
         System.out.println("Error: Use of undeclared variable on line " + tree.pos);
       }
+      else if (tree.exp instanceof ExpCall) {
+        SymbolFunction call = new SymbolFunction(tree.name, 0, null, null);
+        SymbolFunction def = (SymbolFunction)this.getMatchingSymbol(call);
+        if(def == null){
+          System.out.println("Error: Use of undeclared function on line " + tree.pos);
+        }
+        else if(TypeSpec.VOID.equals(def.getReturnType())){
+          System.out.println("Error: Function with void return type cannot be used for indexing. Line " + tree.pos);
+        }
+      }
     }
+    showTable(tree.exp, spaces);
   }
 
   //
