@@ -348,7 +348,35 @@ public class SymbolTable {
 
   //
   private void showTable(ExpOp tree, int spaces) {
+    if (tree.left instanceof ExpCall){
+      ExpCall call = (ExpCall) tree.left;
+      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      try {
+        SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
+        if (TypeSpec.VOID.equals(match.getReturnType())){
+          indent(spaces);
+          System.out.println("Error: " + match.getId() + " of type VOID used in expression requiring type INT on line "
+            + tree.pos);
+        }
+      } catch (Exception e) {
+        //Do nothing
+      }
+    }
     showTable(tree.left, spaces);
+    if (tree.right instanceof ExpCall){
+      ExpCall call = (ExpCall) tree.right;
+      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      try {
+        SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
+        if (TypeSpec.VOID.equals(match.getReturnType())){
+          indent(spaces);
+          System.out.println("Error: " + match.getId() + " of type VOID used in expression requiring type INT on line "
+                  + tree.pos);
+        }
+      } catch (Exception e) {
+        //Do nothing
+      }
+    }
     showTable(tree.right, spaces);
   }
 }
