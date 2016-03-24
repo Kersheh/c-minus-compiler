@@ -13,7 +13,7 @@ public class SymbolInt extends Symbol {
 
   @Override
   public String toString() {
-    String s = "int " + this.getId();
+    String s = "Var: " + this.getType().toLowerCase() + " " + this.getId();
     return s;
   }
 }
