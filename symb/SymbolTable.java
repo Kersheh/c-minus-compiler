@@ -95,14 +95,19 @@ public class SymbolTable {
       SymbolFunction tempDecl = (SymbolFunction)decl;
       SymbolFunction tempUse = (SymbolFunction)use;
       if(tempDecl.getParameters() != null  && tempUse.getParameters() == null){
-        throw new InvalidTypeException("");
+        throw new InvalidTypeException(tempDecl.getId() + " takes zero parameters, "
+                                       + tempUse.getParameters().size() 
+                                       + " parameters were provided.");
       }
       if(tempDecl.getParameters() == null  && tempUse.getParameters() != null){
-        throw new InvalidTypeException("");
+        throw new InvalidTypeException(tempDecl.getId() + " takes " + tempDecl.getParameters().size() 
+                                       + " parameters, zero parameters were provided.");
       }
       if(tempDecl.getParameters() != null && tempUse.getParameters() != null){
         if(tempDecl.getParameters().size() != tempUse.getParameters().size()){
-          throw new InvalidTypeException("");
+          throw new InvalidTypeException(tempDecl.getId() + " takes " + tempDecl.getParameters().size() 
+                                         + " parameters, " + tempUse.getParameters().size() 
+                                         + " parameters were provided.");
         }
         Iterator declIter = tempDecl.getParameters().iterator();
         Iterator useIter = tempUse.getParameters().iterator();
@@ -110,7 +115,9 @@ public class SymbolTable {
           SymbolFunction declNext = (SymbolFunction)declIter.next();
           SymbolFunction useNext = (SymbolFunction)useIter.next();
           if(declNext.getClass() != useNext.getClass()){
-            throw new InvalidTypeException("");
+            throw new InvalidTypeException("Incorrect matching parameters: " + 
+                                           declNext.getClass() + " and " + 
+                                           useNext.getClass());
           }
         }
       }
