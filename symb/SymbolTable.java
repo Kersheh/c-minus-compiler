@@ -193,7 +193,7 @@ public class SymbolTable {
       return;
     }
     if (tree.array){
-      Symbol s = new SymbolArray(tree.name, 0);
+      Symbol s = new SymbolArray(tree.name, 0, tree.size);
       if(!this.addSymbol(s)){
         indent(spaces);
         System.out.println("Variable redefinition error on line " + (tree.pos + 1));
@@ -287,6 +287,20 @@ public class SymbolTable {
   }
 
   private void showTable(StmtSelect tree, int spaces) {
+    if (tree.test instanceof ExpCall){
+      ExpCall call = (ExpCall) tree.test;
+      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      try {
+        SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
+        if (TypeSpec.VOID.equals(match.getReturnType())){
+          indent(spaces);
+          System.out.println("Error: " + match.getId() + " of type VOID used in condition requiring type INT on line "
+                  + tree.pos);
+        }
+      } catch (Exception e) {
+        //Do nothing
+      }
+    }
     showTable(tree.test, spaces);
     showTable(tree.then_stmt, spaces);
     if (tree.else_stmt != null)
@@ -294,6 +308,20 @@ public class SymbolTable {
   }
 
   private void showTable(StmtWhile tree, int spaces) {
+    if (tree.test instanceof ExpCall){
+      ExpCall call = (ExpCall) tree.test;
+      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      try {
+        SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
+        if (TypeSpec.VOID.equals(match.getReturnType())){
+          indent(spaces);
+          System.out.println("Error: " + match.getId() + " of type VOID used in condition requiring type INT on line "
+                  + tree.pos);
+        }
+      } catch (Exception e) {
+        //Do nothing
+      }
+    }
     showTable(tree.test, spaces);
     showTable(tree.stmt, spaces);
   }

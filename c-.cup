@@ -153,7 +153,7 @@ precedence left ELSE;
                     if(TypeSpec.VOID.equals(t.type)){
                       parser.report_error("Invalid variable declaration: void is not a valid type", t);
                     } else {
-                      RESULT = new DeclarVar(tleft, t, i, true);
+                      RESULT = new DeclarVar(tleft, t, i, true, Integer.parseInt(n));
                     }
                   :}
                   | error:e SEMI
