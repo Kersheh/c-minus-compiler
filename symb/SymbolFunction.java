@@ -27,11 +27,16 @@ public class SymbolFunction extends Symbol {
 
   @Override
   public String toString(){
-    String s = this.returnType + " Function " + this.getId() + " (";
-    for(SymbolInt i : this.parameters){
-      s = s + " " + i.toString();
+    String s = "Function: " + this.returnType.toLowerCase() + " " + this.getId();
+    if (this.parameters == null) {
+      s = s + "( void )";
+    } else {
+      s = s + " (";
+      for(SymbolInt i : this.parameters){
+        s = s + " " + i.toString();
+      }
+      s = s + " )";
     }
-    s = s + " )";
     return s;
   }
 

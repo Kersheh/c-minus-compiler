@@ -114,7 +114,7 @@ public class SymbolTable {
   public void printScope(int spaces){
     for(Symbol s : this.tableStack.peek().values()){
       indent(spaces);
-      System.out.println(s.getId());
+      System.out.println(s);
     }
   }
 
