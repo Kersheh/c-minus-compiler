@@ -35,10 +35,9 @@ public class SymbolTable {
     this.tableStack.pop();
   }
 
-  public void addSymbol(Symbol symb) {
+  public boolean addSymbol(Symbol symb) {
     if (symb.getType() == Symbol.FUNC_TYPE && this.tableStack.size() != 1){
-      //error
-      return;
+      return false;
     }
     List<String> key = Arrays.asList(symb.getId(), symb.getType());
     HashMap<List<String>, Symbol> top = this.tableStack.peek();
@@ -48,8 +47,9 @@ public class SymbolTable {
     if (top.get(key) == null){
       top.put(key, symb);
     } else {
-      //error
+      return false;
     }
+    return true;
   }
 
   public boolean validSymbolInScope(Symbol symb){
