@@ -139,13 +139,13 @@ precedence left ELSE;
                   ;
 
   // var-declaration --> type-specifier ID ; | type-specifier ID [ NUM ] ;
-  var_declar  ::= type:t ID:i SEMI
+  var_declar  ::= INT:t ID:i SEMI
                   {:
-                    RESULT = new DeclarVar(tleft, t, i, false);
+                    RESULT = new DeclarVar(tleft, new TypeSpec(tleft, TypeSpec.INT), i, false);
                   :}
-                  | type:t ID:i LBRACKET NUM:n RBRACKET SEMI
+                  | INT:t ID:i LBRACKET NUM:n RBRACKET SEMI
                   {:
-                    RESULT = new DeclarVar(tleft, t, i, true);
+                    RESULT = new DeclarVar(tleft, new TypeSpec(tleft, TypeSpec.INT), i, true);
                   :}
                   | error:e SEMI
                   {:
@@ -156,7 +156,7 @@ precedence left ELSE;
   // type-specifier --> int | void
   type        ::= INT:i
                   {:
-                    RESULT = new TypeSpec(ileft, "int");
+                    RESULT = new TypeSpec(ileft, TypeSpec.INT);
                   :}
                   | VOID:v
                   {:
@@ -218,11 +218,11 @@ precedence left ELSE;
   // param --> type-specifier ID | type-specifier ID [ ]
   param       ::= INT:t ID:i
                   {:
-                    RESULT = new Param(tleft, new TypeSpec(tleft, "int"), i, false);
+                    RESULT = new Param(tleft, new TypeSpec(tleft, TypeSpec.INT), i, false);
                   :}
                   | INT:t ID:i LBRACKET RBRACKET 
                   {:
-                    RESULT = new Param(tleft, new TypeSpec(tleft, "int"), i, true);
+                    RESULT = new Param(tleft, new TypeSpec(tleft, TypeSpec.INT), i, true);
                   :}
                   ;
 
