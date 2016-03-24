@@ -1,0 +1,23 @@
+/*
+  Source: Fei Song
+  File name: 9.cm
+  Third-Fifth program from checkpoint 2's marking scheme.
+*/
+
+int fun1(int fff) {
+  int x; int y; void z;
+  x = x * 2 + 1;
+  y = x + z;
+}
+
+void fun2(void) {
+  int x;
+  x = 2;
+  return x;
+}
+
+void main(void) {
+  int x; void y;
+  if(x) output(x);
+  if(y) output(y);
+}

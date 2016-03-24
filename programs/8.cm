@@ -1,0 +1,10 @@
+/*
+  Source: Fei Song
+  File name: 8.cm
+  Second program from checkpoint 2's marking scheme.
+*/
+
+void main(void) {
+  int x; void y;
+  y = x;
+}
