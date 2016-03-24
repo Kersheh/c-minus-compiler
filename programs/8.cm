@@ -1,10 +1,15 @@
 /*
   Source: Fei Song
   File name: 8.cm
-  Second program from checkpoint 2's marking scheme.
+  Second program modified from checkpoint 2's marking scheme.
 */
 
+void foo(void) {
+  int x;
+}
+
 void main(void) {
-  int x; void y;
-  y = x;
+  int x;
+  x = foo();
+  x = foo(x);
 }
