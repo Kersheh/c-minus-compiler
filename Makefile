@@ -12,7 +12,7 @@ FILES = $(wildcard $(DIRS:=/*.cm))
 
 all: Cminus.class
 
-Cminus.class: symb/*.java absyn/*.java parser.java sym.java Lexer.java Cminus.java
+Cminus.class: symb/*.java symb/exceptions/*.java absyn/*.java parser.java sym.java Lexer.java Cminus.java
 
 %.class: %.java
 	$(JAVAC) $(CLASSPATH)  $^

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import absyn.*;
+import symb.exceptions.*;
 
 public class SymbolTable {
 
@@ -41,7 +42,7 @@ public class SymbolTable {
   }
 
   public boolean addSymbol(Symbol symb) {
-    if (symb.getType() == Symbol.FUNC_TYPE && this.tableStack.size() != 1){
+    if(symb.getType() == Symbol.FUNC_TYPE && this.tableStack.size() != 1){
       return false;
     }
     List<String> key = Arrays.asList(symb.getId(), symb.getType());
@@ -49,7 +50,7 @@ public class SymbolTable {
     if(top == null){
       throw new RuntimeException();
     }
-    if (top.get(key) == null){
+    if(top.get(key) == null){
       top.put(key, symb);
     } else {
       return false;
@@ -57,54 +58,63 @@ public class SymbolTable {
     return true;
   }
 
-  public boolean validSymbolInScope(Symbol symb){
+  public Symbol getMatchingSymbol(Symbol symb) throws InvalidTypeException,
+      UndeclaredException {
     List<String> key = Arrays.asList(symb.getId(), symb.getType());
     for(HashMap<List<String>, Symbol> table : this.tableStack){
-      if (table.get(key) != null && sameType(table.get(key), symb)){
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public Symbol getMatchingSymbol(Symbol symb){
-    List<String> key = Arrays.asList(symb.getId(), symb.getType());
-    for(HashMap<List<String>, Symbol> table : this.tableStack){
-      if (table.get(key) != null && sameType(table.get(key), symb)){
+      if (table.get(key) != null) {
+        try {
+          sameType(table.get(key), symb);
+        } catch(InvalidTypeException e) {
+          throw e;
+        } catch(UndeclaredException e) {
+          throw e;
+        }
         return table.get(key);
       }
     }
     return null;
   }
 
-  private boolean sameType(Symbol decl, Symbol use){
-    if(decl == null || use == null || !decl.getId().equals(use.getId())
-        || !decl.getType().equals(use.getType()) || decl.getClass() != use.getClass()){
-      return false;
+  private void sameType(Symbol decl, Symbol use) throws InvalidTypeException, 
+      UndeclaredException {
+    if(decl == null || use == null || !decl.getId().equals(use.getId()) 
+       || !decl.getType().equals(use.getType())) {
+      throw new UndeclaredException("Use of undeclared variable");
     }
 
-    if(decl.getClass() == SymbolFunction.class){
+    if(Symbol.INT_TYPE.equals(decl.getType()) && decl.getClass() != decl.getClass()) {
+      if(decl.getClass() == SymbolArray.class){
+        throw new InvalidTypeException(decl.getId() + " defined as array; used as int");
+      } else {
+        throw new InvalidTypeException(use.getId() + "  defined as array; used as int");
+      }
+    }
+
+    if(decl.getClass() == decl.getClass() && Symbol.FUNC_TYPE.equals(decl.getType())){
       SymbolFunction tempDecl = (SymbolFunction)decl;
       SymbolFunction tempUse = (SymbolFunction)use;
-      if((tempDecl.getParameters() != null  && tempUse.getParameters() == null)
-        || (tempDecl.getParameters() == null  && tempUse.getParameters() != null)){
-        return false;
+      if(tempDecl.getParameters() != null  && tempUse.getParameters() == null){
+        throw new InvalidTypeException("");
+      }
+      if(tempDecl.getParameters() == null  && tempUse.getParameters() != null){
+        throw new InvalidTypeException("");
       }
       if(tempDecl.getParameters() != null && tempUse.getParameters() != null){
-        if (tempDecl.getParameters().size() != tempUse.getParameters().size()){
-          return false;
+        if(tempDecl.getParameters().size() != tempUse.getParameters().size()){
+          throw new InvalidTypeException("");
         }
         Iterator declIter = tempDecl.getParameters().iterator();
         Iterator useIter = tempUse.getParameters().iterator();
         while(declIter.hasNext() && useIter.hasNext()){
-          if (declIter.next().getClass() != useIter.next().getClass()){
-            return false;
+          SymbolFunction declNext = (SymbolFunction)declIter.next();
+          SymbolFunction useNext = (SymbolFunction)useIter.next();
+          if(declNext.getClass() != useNext.getClass()){
+            throw new InvalidTypeException("");
           }
         }
       }
     }
-
-    return true;
   }
 
   static private void indent(int spaces) {
@@ -175,18 +185,19 @@ public class SymbolTable {
       Symbol s = new SymbolArray(tree.name, 0);
       if(!this.addSymbol(s)){
         indent(spaces);
-        System.out.println("Variable redefinition error");
+        System.out.println("Variable redefinition error on line " + tree.pos);
       }
     }
     else{
       Symbol s = new SymbolInt(tree.name, 0);
       if(!this.addSymbol(s)){
         indent(spaces);
-        System.out.println("Variable redefinition error");
+        System.out.println("Variable redefinition error on line " + tree.pos);
       }
     }
   }
 
+  //
   private void showTable(DeclarFun tree, int spaces) {
     spaces += SPACES;
     indent(spaces);
@@ -227,7 +238,6 @@ public class SymbolTable {
     }
   }
 
-  //
   private void showTable(Stmt tree, int spaces) {
     if(tree instanceof StmtComp){
       indent(spaces);
@@ -283,7 +293,6 @@ public class SymbolTable {
       showTable(tree.item, spaces);
   }
 
-  //
   public void showTable(Exp tree, int spaces) {
     if(tree instanceof ExpAssign)
       showTable((ExpAssign)tree, spaces);
@@ -295,48 +304,46 @@ public class SymbolTable {
       showTable((ExpVar)tree, spaces);
   }
 
+  //
   private void showTable(ExpAssign tree, int spaces) {
     showTable(tree.lhs, spaces);
     showTable(tree.rhs, spaces);
   }
 
-  //
   private void showTable(ExpCall tree, int spaces) {
     Symbol s = new SymbolFunction(tree.id, 0, null, null);
-    if(!this.validSymbolInScope(s)){
+    try {
+      this.getMatchingSymbol(s);
+    }
+    catch(Exception e) {
       indent(spaces);
-      System.out.println("Error: Use of undeclared function on line " + tree.pos);
+      System.out.println(e.getMessage() + ": on line " + tree.pos);
     }
     if(tree.args != null)
       showTable(tree.args, spaces);
   }
 
-  //
   private void showTable(ExpVar tree, int spaces) {
     if(tree.exp == null) { //normal variable
       Symbol s = new SymbolInt(tree.name, 0);
-      if(!this.validSymbolInScope(s)){
+      try {
+        this.getMatchingSymbol(s);
+      }
+      catch(Exception e) {
         indent(spaces);
-        System.out.println("Error: Use of undeclared variable on line " + tree.pos);
+        System.out.println(e.getMessage() + ": on line " + tree.pos);
       }
     } else { //array variable
       Symbol s = new SymbolArray(tree.name, 0);
-      if(!this.validSymbolInScope(s)){
+      try {
+        Symbol match = this.getMatchingSymbol(s);
+      }
+      catch(Exception e) {
         indent(spaces);
-        System.out.println("Error: Use of undeclared variable on line " + tree.pos);
+        System.out.println(e.getMessage() + ": on line " + tree.pos);
       }
-      else if (tree.exp instanceof ExpCall) {
-        SymbolFunction call = new SymbolFunction(tree.name, 0, null, null);
-        SymbolFunction def = (SymbolFunction)this.getMatchingSymbol(call);
-        if(def == null){
-          System.out.println("Error: Use of undeclared function on line " + tree.pos);
-        }
-        else if(TypeSpec.VOID.equals(def.getReturnType())){
-          System.out.println("Error: Function with void return type cannot be used for indexing. Line " + tree.pos);
-        }
-      }
+      showTable(tree.exp, spaces);
     }
-    showTable(tree.exp, spaces);
   }
 
   //
