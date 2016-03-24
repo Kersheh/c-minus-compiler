@@ -98,7 +98,7 @@ precedence left ELSE;
                         }
                         // print symbol tables
                         if("-s".equals(arg)) {
-                          SymbolTable.showTable();
+                          SymbolTable.getInstance().showTable(RESULT, 0);
                         }
                       }
                     }

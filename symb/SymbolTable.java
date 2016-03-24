@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import absyn.*;
 
 public class SymbolTable {
 
@@ -92,7 +93,208 @@ public class SymbolTable {
     for(int i = 0; i < spaces; i++) System.out.print(" ");
   }
 
-  static public void showTable() {
-    System.out.println("Placeholder");
-  } 
+  public void printScope(int spaces){
+    for(Symbol s : this.tableStack.peek().values()){
+      indent(spaces);
+      System.out.println(s.getId());
+    }
+  }
+
+  public void showTable(DeclarList tree, int spaces) {
+    while(tree != null) {
+      showTable(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  public void showTable(DeclarListLocal tree, int spaces) {
+    while(tree != null) {
+      showTable(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  //
+  public void showTable(ExpList tree, int spaces) {
+    while(tree != null) {
+      showTable(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  public void showTable(StmtList tree, int spaces) {
+    while(tree != null) {
+      showTable(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  public void showTable(ParamList tree, int spaces) {
+    while(tree != null) {
+      showTable(tree.head, spaces);
+      tree = tree.tail;
+    }
+  }
+
+  public void showTable(Declar tree, int spaces) {
+    if(tree instanceof DeclarVar)
+      showTable((DeclarVar)tree, spaces);
+    else if(tree instanceof DeclarFun)
+      showTable((DeclarFun)tree, spaces);
+    else {
+      //do nothing ¯\_(ツ)_/¯
+    }
+  }
+
+  private void showTable(DeclarVar tree, int spaces) {
+    if(tree == null) {
+      return;
+    }
+    if (tree.array){
+      Symbol s = new SymbolArray(tree.name, 0);
+      if(!this.addSymbol(s)){
+        indent(spaces);
+        System.out.println("Variable redefinition error");
+      }
+    }
+    else{
+      Symbol s = new SymbolInt(tree.name, 0);
+      if(!this.addSymbol(s)){
+        indent(spaces);
+        System.out.println("Variable redefinition error");
+      }
+    }
+  }
+
+  private void showTable(DeclarFun tree, int spaces) {
+    Symbol s = new SymbolFunction(tree.name, 0, null);
+    if(!this.addSymbol(s)){
+      indent(spaces);
+      System.out.println("Function redefinition error");
+    }
+    this.newScope();
+    spaces += SPACES;
+    showTable(tree.params, spaces);
+    showTable(tree.stmt, spaces);
+    this.printScope(spaces);
+    this.leaveScope();
+  }
+
+  private void showTable(Params tree, int spaces) {
+    if(!tree.isVoidParams){
+      showTable(tree.param_list, spaces);
+    }
+  }
+
+  private void showTable(Param tree, int spaces) {
+    indent(spaces);
+    if (tree.array) {
+      Symbol s = new SymbolArray(tree.id, 0);
+      if(!this.addSymbol(s)){
+        indent(spaces);
+        System.out.println("Parameter redefinition error");
+      }
+    }
+    else {
+      Symbol s = new SymbolInt(tree.id, 0);
+      if(!this.addSymbol(s)){
+        indent(spaces);
+        System.out.println("Parameter redefinition error");
+      }
+    }
+  }
+
+  //
+  private void showTable(Stmt tree, int spaces) {
+    if(tree instanceof StmtComp){
+      this.newScope();
+      spaces += SPACES;
+      showTable((StmtComp)tree, spaces);
+      this.printScope(spaces);
+      this.leaveScope();
+    }
+    else if(tree instanceof StmtExp){
+      showTable((StmtExp)tree, spaces);
+    }
+    else if(tree instanceof StmtSelect){
+      showTable((StmtSelect)tree, spaces);
+    }
+    else if(tree instanceof StmtWhile){
+      showTable((StmtWhile)tree, spaces);
+    }
+    else if(tree instanceof StmtReturn){
+      showTable((StmtReturn)tree, spaces);
+    }
+    else {
+      indent(spaces);
+      System.out.println("Illegal statement");
+    }
+  }
+
+  private void showTable(StmtComp tree, int spaces) {
+    showTable(tree.declar_local, spaces);
+    showTable(tree.stmt_list, spaces);
+  }
+
+  private void showTable(StmtExp tree, int spaces) {
+    showTable(tree.exp, spaces);
+  }
+
+  private void showTable(StmtSelect tree, int spaces) {
+    showTable(tree.test, spaces);
+    showTable(tree.then_stmt, spaces);
+    if (tree.else_stmt != null)
+      showTable(tree.else_stmt, spaces);
+  }
+
+  private void showTable(StmtWhile tree, int spaces) {
+    showTable(tree.test, spaces);
+    showTable(tree.stmt, spaces);
+  }
+
+  //
+  private void showTable(StmtReturn tree, int spaces) {
+    if (tree.item != null)
+      showTable(tree.item, spaces);
+  }
+
+  //
+  public void showTable(Exp tree, int spaces) {
+    if(tree instanceof ExpAssign)
+      showTable((ExpAssign)tree, spaces);
+    else if(tree instanceof ExpCall)
+      showTable((ExpCall)tree, spaces);
+    else if(tree instanceof ExpOp)
+      showTable((ExpOp)tree, spaces);
+    else if(tree instanceof ExpVar)
+      showTable((ExpVar)tree, spaces);
+    else {
+      indent(spaces);
+      System.out.println("Illegal expression at line " + tree.pos);
+    }
+  }
+
+  //
+  private void showTable(ExpAssign tree, int spaces) {
+    showTable(tree.lhs, spaces);
+    showTable(tree.rhs, spaces);
+  }
+
+  //
+  private void showTable(ExpCall tree, int spaces) {
+    if(tree.args != null)
+      showTable(tree.args, spaces);
+  }
+
+  //
+  private void showTable(ExpVar tree, int spaces) {
+    if(tree.exp != null)
+      showTable(tree.exp, spaces);
+  }
+
+  //
+  private void showTable(ExpOp tree, int spaces) {
+    showTable(tree.left, spaces);
+    showTable(tree.right, spaces);
+  }
 }
