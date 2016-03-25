@@ -1,4 +1,5 @@
 package symb;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SymbolFunction extends Symbol {
@@ -6,9 +7,9 @@ public class SymbolFunction extends Symbol {
   private List<SymbolInt> parameters;
   private String returnType;
 
-  public SymbolFunction(String id, int addr, List<SymbolInt> parameters, String returnType) {
+  public SymbolFunction(String id, int addr, String returnType) {
     super(id, addr);
-    this.parameters = parameters;
+    this.parameters = new ArrayList<>();
     this.returnType = returnType;
   }
 
@@ -23,6 +24,13 @@ public class SymbolFunction extends Symbol {
 
   public List<SymbolInt> getParameters(){
     return this.parameters;
+  }
+
+  public void addParameter(SymbolInt s){
+    if (this.parameters == null) {
+      this.parameters = new ArrayList<>();
+    }
+    this.parameters.add(s);
   }
 
   @Override

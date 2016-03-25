@@ -14,4 +14,10 @@ void main(void) {
   a[x] = 1;
   a[foo(x)] = 2;
   a[foo(x) + x] = 2;
+  if (foo(x)) {
+    int a;
+  }
+  if (foo(x) + 2) {
+    int b;
+  }
 }

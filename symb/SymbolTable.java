@@ -18,8 +18,9 @@ public class SymbolTable {
 
   private SymbolTable() {
     tableStack.push(new LinkedHashMap<>());
-    Symbol input = new SymbolFunction("input", 0, null, TypeSpec.INT);
-    Symbol output = new SymbolFunction("output", 0, null, TypeSpec.VOID);
+    SymbolFunction input = new SymbolFunction("input", 0, TypeSpec.INT);
+    SymbolFunction output = new SymbolFunction("output", 0, TypeSpec.VOID);
+    output.addParameter(new SymbolInt("x", 0));
     this.addSymbol(input);
     this.addSymbol(output);
   }
@@ -69,9 +70,7 @@ public class SymbolTable {
       if (table.get(key) != null) {
         try {
           sameType(table.get(key), symb);
-        } catch(InvalidTypeException e) {
-          throw e;
-        } catch(UndeclaredException e) {
+        } catch(InvalidTypeException | UndeclaredException e) {
           throw e;
         }
         return table.get(key);
@@ -87,45 +86,36 @@ public class SymbolTable {
       throw new UndeclaredException("Use of undeclared variable");
     }
 
-    if(Symbol.INT_TYPE.equals(decl.getType()) && decl.getClass() != decl.getClass()) {
+    if(Symbol.INT_TYPE.equals(decl.getType()) && decl.getClass() != use.getClass()) {
       if(decl.getClass() == SymbolArray.class){
         throw new InvalidTypeException(decl.getId() + " defined as array; used as int");
       } else {
         throw new InvalidTypeException(use.getId() + "  defined as array; used as int");
       }
     }
+  }
 
-    if(decl.getClass() == decl.getClass() && Symbol.FUNC_TYPE.equals(decl.getType())){
-      SymbolFunction tempDecl = (SymbolFunction)decl;
-      SymbolFunction tempUse = (SymbolFunction)use;
-      if(tempDecl.getParameters() != null  && tempUse.getParameters() == null){
-        throw new InvalidTypeException(tempDecl.getId() + " takes zero parameters, "
-                                       + tempUse.getParameters().size() 
-                                       + " parameters were provided.");
+  private boolean haveMatchingParameters(SymbolFunction decl, SymbolFunction use){
+    if(decl.getParameters() == null  && use.getParameters() == null){
+      return true;
+    }
+    if((decl.getParameters() != null  && use.getParameters() == null)
+      || (decl.getParameters() == null  && use.getParameters() != null)){
+        return false;
+    }
+    if(decl.getParameters() != null && use.getParameters() != null){
+      if(decl.getParameters().size() != use.getParameters().size()){
+        return false;
       }
-      if(tempDecl.getParameters() == null  && tempUse.getParameters() != null){
-        throw new InvalidTypeException(tempDecl.getId() + " takes " + tempDecl.getParameters().size() 
-                                       + " parameters, zero parameters were provided.");
-      }
-      if(tempDecl.getParameters() != null && tempUse.getParameters() != null){
-        if(tempDecl.getParameters().size() != tempUse.getParameters().size()){
-          throw new InvalidTypeException(tempDecl.getId() + " takes " + tempDecl.getParameters().size() 
-                                         + " parameters, " + tempUse.getParameters().size() 
-                                         + " parameters were provided.");
-        }
-        Iterator declIter = tempDecl.getParameters().iterator();
-        Iterator useIter = tempUse.getParameters().iterator();
-        while(declIter.hasNext() && useIter.hasNext()){
-          SymbolFunction declNext = (SymbolFunction)declIter.next();
-          SymbolFunction useNext = (SymbolFunction)useIter.next();
-          if(declNext.getClass() != useNext.getClass()){
-            throw new InvalidTypeException("Incorrect matching parameters: " + 
-                                           declNext.getClass() + " and " + 
-                                           useNext.getClass());
-          }
+      Iterator<SymbolInt> declIter = decl.getParameters().iterator();
+      Iterator<SymbolInt> useIter = use.getParameters().iterator();
+      while(declIter.hasNext() && useIter.hasNext()){
+        if(declIter.next().getClass() != useIter.next().getClass()){
+          return false;
         }
       }
     }
+    return true;
   }
 
   static private void indent(int spaces) {
@@ -162,8 +152,27 @@ public class SymbolTable {
   }
 
   //
-  public void showTable(ExpList tree, int spaces) {
+  public void showTable(ExpList tree, int spaces, SymbolFunction func) {
     while(tree != null) {
+      if(tree.head instanceof ExpVar){
+        ExpVar var = (ExpVar) tree.head;
+        if (var.exp != null){
+          func.addParameter(new SymbolInt("arg", 0));
+        } else {
+          Symbol match = null;
+          SymbolInt s = new SymbolArray(var.name, 0);
+          try {
+            match = this.getMatchingSymbol(s);
+          } catch (InvalidTypeException e) {
+            s = new SymbolInt(var.name, 0);
+          } catch (Exception e){
+            //Do nothing
+          }
+          func.addParameter(s);
+        }
+      } else {
+        func.addParameter(new SymbolInt("arg", 0));
+      }
       showTable(tree.head, spaces);
       tree = tree.tail;
     }
@@ -213,12 +222,11 @@ public class SymbolTable {
     }
   }
 
-  //
   private void showTable(DeclarFun tree, int spaces) {
     spaces += SPACES;
     indent(spaces);
     System.out.println("Local scope at " + tree.name +  ":");
-    Symbol s = new SymbolFunction(tree.name, 0, null, tree.type.type);
+    Symbol s = new SymbolFunction(tree.name, 0, tree.type.type);
     if(!this.addSymbol(s)){
       indent(spaces);
       System.out.println("Function redefinition error");
@@ -239,17 +247,21 @@ public class SymbolTable {
 
   private void showTable(Param tree, int spaces) {
     if (tree.array) {
-      Symbol s = new SymbolArray(tree.id, 0);
+      SymbolArray s = new SymbolArray(tree.id, 0);
       if(!this.addSymbol(s)){
         indent(spaces);
         System.out.println("Parameter redefinition error");
+      } else {
+        this.currentFunction.addParameter(s);
       }
     }
     else {
-      Symbol s = new SymbolInt(tree.id, 0);
+      SymbolInt s = new SymbolInt(tree.id, 0);
       if(!this.addSymbol(s)){
         indent(spaces);
         System.out.println("Parameter redefinition error");
+      } else {
+        this.currentFunction.addParameter(s);
       }
     }
   }
@@ -294,7 +306,7 @@ public class SymbolTable {
   private void showTable(StmtSelect tree, int spaces) {
     if (tree.test instanceof ExpCall){
       ExpCall call = (ExpCall) tree.test;
-      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      Symbol s = new SymbolFunction(call.id, 0, TypeSpec.INT);
       try {
         SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
         if (TypeSpec.VOID.equals(match.getReturnType())){
@@ -315,7 +327,7 @@ public class SymbolTable {
   private void showTable(StmtWhile tree, int spaces) {
     if (tree.test instanceof ExpCall){
       ExpCall call = (ExpCall) tree.test;
-      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      Symbol s = new SymbolFunction(call.id, 0, TypeSpec.INT);
       try {
         SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
         if (TypeSpec.VOID.equals(match.getReturnType())){
@@ -331,7 +343,6 @@ public class SymbolTable {
     showTable(tree.stmt, spaces);
   }
 
-  //
   private void showTable(StmtReturn tree, int spaces) {
     if (tree.item != null) {
       if(!currentFunction.getReturnType().equals(TypeSpec.INT)) {
@@ -358,12 +369,11 @@ public class SymbolTable {
       showTable((ExpVar)tree, spaces);
   }
 
-  //
   private void showTable(ExpAssign tree, int spaces) {
     showTable(tree.lhs, spaces);
     if(tree.rhs instanceof ExpCall){
       ExpCall call = (ExpCall) tree.rhs;
-      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      Symbol s = new SymbolFunction(call.id, 0, TypeSpec.INT);
       try {
         SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
         if (TypeSpec.VOID.equals(match.getReturnType())){
@@ -379,16 +389,23 @@ public class SymbolTable {
   }
 
   private void showTable(ExpCall tree, int spaces) {
-    Symbol s = new SymbolFunction(tree.id, 0, null, null);
+    SymbolFunction s = new SymbolFunction(tree.id, 0, null);
+    SymbolFunction match = null;
     try {
-      this.getMatchingSymbol(s);
+       match = (SymbolFunction) this.getMatchingSymbol(s);
     }
     catch(Exception e) {
       indent(spaces);
       System.out.println(e.getMessage() + ": on line " + (tree.pos + 1));
     }
-    if(tree.args != null)
-      showTable(tree.args, spaces);
+    if (tree.args != null) {
+      showTable(tree.args, spaces, s);
+    }
+    if (!haveMatchingParameters(match, s)) {
+      indent(spaces);
+      System.out.println("Error: arguments in function call to " + match.getId() + " on line "
+              + tree.pos + " does not match definition");
+    }
   }
 
   private void showTable(ExpVar tree, int spaces) {
@@ -397,7 +414,10 @@ public class SymbolTable {
       try {
         this.getMatchingSymbol(s);
       }
-      catch(Exception e) {
+      catch(InvalidTypeException e) {
+        //Do nothing. Arrays can be used without brackets in some cases
+        //i.e. int foo(int arr[]) ...  int a[10]; foo(a);
+      } catch (Exception e){
         indent(spaces);
         System.out.println(e.getMessage() + ": on line " + (tree.pos + 1));
       }
@@ -413,7 +433,7 @@ public class SymbolTable {
 
       if(tree.exp instanceof ExpCall){
         ExpCall call = (ExpCall) tree.exp;
-        Symbol symb = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+        Symbol symb = new SymbolFunction(call.id, 0, TypeSpec.INT);
         try {
           SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(symb);
           if (TypeSpec.VOID.equals(match.getReturnType())){
@@ -433,13 +453,13 @@ public class SymbolTable {
   private void showTable(ExpOp tree, int spaces) {
     if (tree.left instanceof ExpCall){
       ExpCall call = (ExpCall) tree.left;
-      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      Symbol s = new SymbolFunction(call.id, 0, TypeSpec.INT);
       try {
         SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
         if (TypeSpec.VOID.equals(match.getReturnType())){
           indent(spaces);
           System.out.println("Error: " + match.getId() + " of type VOID used in expression requiring type INT on line "
-            + (tree.pos + 1));
+                  + (tree.pos + 1));
         }
       } catch (Exception e) {
         //Do nothing
@@ -448,7 +468,7 @@ public class SymbolTable {
     showTable(tree.left, spaces);
     if (tree.right instanceof ExpCall){
       ExpCall call = (ExpCall) tree.right;
-      Symbol s = new SymbolFunction(call.id, 0, null, TypeSpec.INT);
+      Symbol s = new SymbolFunction(call.id, 0, TypeSpec.INT);
       try {
         SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
         if (TypeSpec.VOID.equals(match.getReturnType())){

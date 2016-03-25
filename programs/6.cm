@@ -18,13 +18,13 @@ void foo(int z) {
 }
 
 int x(void) {
-  y = 1;
+  y = foo(2);
   return;
 }
 
 void main(void) {
-  int x; int y;
+  int x; int y; int a[10];
   x = 2;
-  foo(x);
+  a[foo(x)];
   x();
 }

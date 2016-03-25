@@ -19,8 +19,12 @@ public class SymbolArray extends SymbolInt {
 
   @Override
   public String toString() {
+    String index = "[" + this.size + "]";
+    if (this.size == 0) {
+      index = "[]";
+    }
     String s = "Var: " + this.getType().toLowerCase() + " " + this.getId() + 
-    "[" + this.size + "]";
+    index;
     return s;
   }
 }
