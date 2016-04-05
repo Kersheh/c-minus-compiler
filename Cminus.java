@@ -57,7 +57,7 @@ class Cminus {
     }
     /* execute parser */
     try {
-      parser p = new parser(args_list, new Lexer(new FileReader(filename)));
+      parser p = new parser(filename, args_list, new Lexer(new FileReader(filename)));
       Object result = p.parse().value;      
     } catch(Exception e) {
       e.printStackTrace();

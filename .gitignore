@@ -10,3 +10,4 @@ absyn/*.class
 .idea/*
 *.iml
 TMSimulator
+*.tm

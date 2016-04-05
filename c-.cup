@@ -10,16 +10,19 @@
 
 import absyn.*;
 import symb.*;
+import asm.*;
 import java.util.*;
    
 /* Parser code to change the way the parser reports errors (include
    line and column number of the error). */
 parser code {:
+  public String filename;
   public List<String> args;
   public boolean errors = false;
 
-  public parser(List<String> args, java_cup.runtime.Scanner s) {
+  public parser(String filename, List<String> args, java_cup.runtime.Scanner s) {
     super(s);
+    this.filename = filename;
     this.args = args;
   }
 
@@ -104,6 +107,7 @@ precedence left ELSE;
                         // compile c- to assembly
                         if("-c".equals(arg)) {
                           System.out.println("Compiling to assembly...");
+                          Asm.generateAssembly(this.parser.filename);
                         }
                       }
                     }
