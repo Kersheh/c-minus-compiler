@@ -101,9 +101,13 @@ precedence left ELSE;
                           System.out.println("The symbol table is:");
                           SymbolTable.getInstance().showTable(RESULT, 0);
                         }
+                        // compile c- to assembly
+                        if("-c".equals(arg)) {
+                          System.out.println("Compiling to assembly...");
+                        }
                       }
                     }
-                    System.out.println("Parse complete");
+                    System.out.println("Parse/compile complete");
                   :}
                   ;
 

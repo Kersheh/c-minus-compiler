@@ -30,13 +30,6 @@ test:
 		echo ----------------------- ; \
 	done
 
-test_all:
-	@for file in $(FILES) ; do \
-		echo PROGRAM $$file: ; \
-		java $(CLASSPATH) Cminus -a -s $$file ; \
-		echo ----------------------- ; \
-	done
-
 test_tree:
 	@for file in $(FILES) ; do \
 		echo PROGRAM $$file: ; \
@@ -48,6 +41,13 @@ test_table:
 	@for file in $(FILES) ; do \
 		echo PROGRAM $$file: ; \
 		java $(CLASSPATH) Cminus -s $$file ; \
+		echo ----------------------- ; \
+	done
+
+test_compile:
+	@for file in $(FILES) ; do \
+		echo PROGRAM $$file: ; \
+		java $(CLASSPATH) Cminus -c $$file ; \
 		echo ----------------------- ; \
 	done
 

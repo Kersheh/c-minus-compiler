@@ -9,14 +9,15 @@ generator for Java along with the abstract syntax tree Java files found in the
 directory /absyn and the symbol table Java files found in the directory /symb, 
 and finally compiles the C-Minus Main Java file.
 
-To scan/parse C-Minus source code with optional arguments, run: 
-  $ java -classpath ./java/cup.jar:. C- [-a] [-s] [file_name.cm]
+To scan/parse and compile C-Minus source code with optional arguments, run: 
+  $ java -classpath ./java/cup.jar:. C- [-a] [-s] [-c] [file_name.cm]
 
-To run the test suite of sample C-Minus programs, run:
-  $ make test
+    -a: display abstract syntax tree
+    -s: display symbol tables
+    -c: compile file to assembly
 
 To run the test suite of sample C-Minus programs with the abstract syntax tree, 
-symbal tables, or both, run:
+symbol tables, or compile to assembly:
   (1) $ make test_tree
   (2) $ make test_table
-  (3) $ make test_all
+  (3) $ make test_compile
