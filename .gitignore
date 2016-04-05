@@ -9,5 +9,4 @@ absyn/*.class
 .idea
 .idea/*
 *.iml
-TMSimulator
 *.tm
