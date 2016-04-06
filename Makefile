@@ -45,7 +45,7 @@ test_table:
 	done
 
 clean:
-	rm -f parser.java Lexer.java sym.java *.class absyn/*.class symb/*.class symb/exceptions/*.class asm/*.class *~
+	rm -f parser.java Lexer.java sym.java *.class absyn/*.class symb/*.class symb/exceptions/*.class asm/*.class programs/*.tm  *~
 
 clean_test:
 	rm programs/*.tm
