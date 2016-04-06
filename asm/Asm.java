@@ -166,13 +166,13 @@ public class Asm {
       return;
     }
     if (tree.array){
-      Symbol s = new SymbolArray(tree.name, 0, tree.size);
+      Symbol s = new SymbolArray(tree.name, tree.size);
       if(!this.symbolTable.addSymbol(s)){
         this.symbolTable.error("Variable redefinition error on line " + (tree.pos + 1));
       }
     }
     else{
-      Symbol s = new SymbolInt(tree.name, 0);
+      Symbol s = new SymbolInt(tree.name);
       if(!this.symbolTable.addSymbol(s)){
         this.symbolTable.error("Variable redefinition error on line " + (tree.pos + 1));
       }

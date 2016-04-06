@@ -18,6 +18,8 @@ public class SymbolTable {
 
   private boolean error = false;
 
+  private int currentOffset = 0;
+
   public SymbolTable() {
     this.newScope();
     SymbolFunction input = new SymbolFunction("input", 0, TypeSpec.INT);
@@ -37,6 +39,7 @@ public class SymbolTable {
       return;
     }
     this.tableStack.pop();
+    this.currentOffset -= this.temps.pop();
   }
 
   public int newTemp(){
@@ -131,7 +134,15 @@ public class SymbolTable {
       } catch (Exception e) {
         //Do nothing
       }
-  } 
+  }
+
+  public boolean inGlobalScope(){
+    return this.tableStack.size() == 1;
+  }
+
+  public int getCurrentOffset(){
+    return this.currentOffset;
+  }
 
   public void error(String message){
     System.err.println("Error: " + message);
@@ -227,18 +238,15 @@ public class SymbolTable {
   }
 
   private void showTable(DeclarVar tree, int spaces) {
-    if(tree == null) {
-      return;
-    }
     if (tree.array){
-      Symbol s = new SymbolArray(tree.name, 0, tree.size);
+      Symbol s = new SymbolArray(tree.name, tree.size);
       if(!this.addSymbol(s)){
         indent(spaces);
         System.out.println("Variable redefinition error on line " + (tree.pos + 1));
       }
     }
     else{
-      Symbol s = new SymbolInt(tree.name, 0);
+      Symbol s = new SymbolInt(tree.name);
       if(!this.addSymbol(s)){
         indent(spaces);
         System.out.println("Variable redefinition error on line " + (tree.pos + 1));
