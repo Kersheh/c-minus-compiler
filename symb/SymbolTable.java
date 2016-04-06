@@ -14,9 +14,10 @@ public class SymbolTable {
   private Deque<HashMap<List<String>, Symbol>> tableStack = new ArrayDeque<>();
   private final static int SPACES = 4;
   private SymbolFunction currentFunction;
+  private Deque<Integer> temps = new ArrayDeque<>();
 
   public SymbolTable() {
-    tableStack.push(new LinkedHashMap<>());
+    this.newScope();
     SymbolFunction input = new SymbolFunction("input", 0, TypeSpec.INT);
     SymbolFunction output = new SymbolFunction("output", 0, TypeSpec.VOID);
     output.addParameter(new SymbolInt("x", 0));
@@ -26,6 +27,7 @@ public class SymbolTable {
 
   public void newScope(){
     this.tableStack.push(new LinkedHashMap<>());
+    this.temps.push(0);
   }
 
   public void leaveScope(){
@@ -33,6 +35,13 @@ public class SymbolTable {
       return;
     }
     this.tableStack.pop();
+  }
+
+  public int newTemp(){
+    int top = this.temps.pop();
+    top++;
+    this.temps.push(top);
+    return top;
   }
 
   public boolean addSymbol(Symbol symb) {
