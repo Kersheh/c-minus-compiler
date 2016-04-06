@@ -5,11 +5,11 @@ import java.util.List;
 public class SymbolFunction extends Symbol {
   
   private List<SymbolInt> parameters;
+  private List<SymbolInt> localDeclarations;
   private String returnType;
 
   public SymbolFunction(String id, int addr, String returnType) {
     super(id, addr);
-    this.parameters = new ArrayList<>();
     this.returnType = returnType;
   }
 
@@ -31,6 +31,17 @@ public class SymbolFunction extends Symbol {
       this.parameters = new ArrayList<>();
     }
     this.parameters.add(s);
+  }
+
+  public List<SymbolInt> getLocalDecalartions(){
+    return this.parameters;
+  }
+
+  public void addLocalDecalartion(SymbolInt s){
+    if (this.localDeclarations == null) {
+      this.localDeclarations = new ArrayList<>();
+    }
+    this.localDeclarations.add(s);
   }
 
   @Override
