@@ -36,10 +36,23 @@ abstract public class Asm {
   }
 
   static private void prelude() {
+    asm.append("* Standard prelude:\n");
     asm.append("0:     LD  6,0(0)\n");
     asm.append("1:    LDA  5,0(6)\n");
     asm.append("2:     ST  0,0(0)\n");
-    address += 3;
+    asm.append("* Jump around i/o routines here\n");
+    asm.append("* code for input routine\n");
+    asm.append("4:     ST  0,-1(5)\n");
+    asm.append("5:     IN  0,0,0\n");
+    asm.append("6:     LD  7,-1(5)\n");
+    asm.append("* code for input routine\n");
+    asm.append("7:     ST  0,-1(5)\n");
+    asm.append("8:     LD  0,-2(5)\n");
+    asm.append("9:    OUT  0,0,0\n");
+    asm.append("10:    LD  7,-1(5)\n");
+    asm.append("3:    LDA  7,7(7)\n");
+    asm.append("* End of standard prelude.\n");
+    address += 11;
   }
 
   static public void generateAssembly(String filename) {
