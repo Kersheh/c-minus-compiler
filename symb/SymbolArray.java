@@ -4,8 +4,14 @@ public class SymbolArray extends SymbolInt {
   
   private int size;
 
-  public SymbolArray(String id, int addr) {
-    super(id, addr);
+  public SymbolArray(String id) {
+    super(id);
+    this.size = 0;
+  }
+
+  public SymbolArray(String id, int size) {
+    super(id);
+    this.size = size;
   }
 
   public SymbolArray(String id, int addr, int size) {

@@ -6,6 +6,11 @@ public abstract class Symbol {
   public static final String INT_TYPE = "INT";
   public static final String FUNC_TYPE = "FUNC";
 
+  public Symbol(String id) {
+    this.id = id;
+    this.address = 0;
+  }
+
   public Symbol(String id, int address) {
     this.id = id;
     this.address = address;
@@ -17,6 +22,10 @@ public abstract class Symbol {
 
   public int getAddress(){
   	return this.address;
+  }
+
+  public void setAddress(int address){
+    this.address = address;
   }
 
   abstract public String getType();

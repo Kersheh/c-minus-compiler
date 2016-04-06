@@ -8,6 +8,11 @@ public class SymbolFunction extends Symbol {
   private List<SymbolInt> localDeclarations;
   private String returnType;
 
+  public SymbolFunction(String id, String returnType) {
+    super(id);
+    this.returnType = returnType;
+  }
+
   public SymbolFunction(String id, int addr, String returnType) {
     super(id, addr);
     this.returnType = returnType;
