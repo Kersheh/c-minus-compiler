@@ -26,7 +26,7 @@ parser.java: c-.cup
 test:
 	@for file in $(FILES) ; do \
 		echo PROGRAM $$file: ; \
-		java $(CLASSPATH) Cminus $$file ; \
+		java $(CLASSPATH) Cminus -c $$file ; \
 		echo ----------------------- ; \
 	done
 
@@ -41,13 +41,6 @@ test_table:
 	@for file in $(FILES) ; do \
 		echo PROGRAM $$file: ; \
 		java $(CLASSPATH) Cminus -s $$file ; \
-		echo ----------------------- ; \
-	done
-
-test_compile:
-	@for file in $(FILES) ; do \
-		echo PROGRAM $$file: ; \
-		java $(CLASSPATH) Cminus -c $$file ; \
 		echo ----------------------- ; \
 	done
 

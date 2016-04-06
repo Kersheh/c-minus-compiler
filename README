@@ -10,14 +10,18 @@ directory /absyn and the symbol table Java files found in the directory /symb,
 and finally compiles the C-Minus Main Java file.
 
 To scan/parse and compile C-Minus source code with optional arguments, run: 
-  $ java -classpath ./java/cup.jar:. C- [-a] [-s] [-c] [file_name.cm]
+  $ java -classpath ./java/cup.jar:. C- [-a|-s|-c] [file_name.cm]
 
     -a: display abstract syntax tree
     -s: display symbol tables
     -c: compile file to assembly
 
-To run the test suite of sample C-Minus programs with the abstract syntax tree, 
-symbol tables, or compile to assembly:
+To run the test suite of sample C-Minus programs compiling to .tm assembly, 
+run:
+
+  $ make test
+
+To run the test suite of sample C-Minus programs with the abstract syntax tree 
+or symbol tables, run:
   (1) $ make test_tree
   (2) $ make test_table
-  (3) $ make test_compile
