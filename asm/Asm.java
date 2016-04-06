@@ -5,22 +5,41 @@ import symb.*;
 import java.io.*;
 import java.util.*;
 
-abstract public class Asm {
-  static private StringBuilder asm = new StringBuilder(); //string output to .tm file
-  static private int address = 0;
+public class Asm {
+  private String input = "";
+  private StringBuilder asm = new StringBuilder(); //string output to .tm file
+  private int address = 0;
+  private int pc = 0;
+  static private final int PC = 7;
+  static private final int GP = 6;
+  static private final int FP = 5;
+  static private final int AC = 0;
+  static private final int AC1 = 1;
 
-  public enum Operations {
+  /* parse intermediate code and call conversion to assembly code */
+  public void parseInterm() {
+    Scanner scanner = new Scanner(this.input);
+    String line;
+    while(scanner.hasNextLine()) {
+      line = scanner.nextLine();
+      intermToAsm(line);
+    }
+    scanner.close();
+  }
+
+  private enum Operations {
     HALT, IN, OUT, ADD, SUB, MUL, DIV, LD, ST,
     LDA, LDC, JLT, JLE, JGT, JGE, JEQ, JNE;
   }
 
-  static private List<Operations> registerOnly = Arrays.asList(
+  private List<Operations> registerOnly = Arrays.asList(
     Operations.HALT, Operations.IN, Operations.OUT, 
     Operations.ADD, Operations.SUB, Operations.MUL, 
     Operations.DIV, Operations.LDC
   );
 
-  static private void addLine(int addr, Operations oper, int r, int s, int t) {
+  /* add assembly line to output StringBuilder */
+  private void addLine(int addr, Operations oper, int r, int s, int t) {
     if(registerOnly.contains(oper)) {
       asm.append(addr + ":  " + r + "," + s + "," + t + "\n");
     }
@@ -29,13 +48,21 @@ abstract public class Asm {
     }
   }
 
-  static private void header(String filename) {
+  /* convert intermediate code line to assembly code */
+  private void intermToAsm(String line) {
+    //
+    address += 1;
+  }
+
+  /* default assembly code header */
+  private void header(String filename) {
     asm.append("* C-Minus Compilation to TM Code\n");
     String out = filename.substring(0, filename.lastIndexOf(".")) + ".tm";
     asm.append("* File: " + out + "\n");
   }
 
-  static private void prelude() {
+  /* default assembly code prelude - input and ouput */
+  private void prelude() {
     asm.append("* Standard prelude:\n");
     asm.append("0:     LD  6,0(0)\n");
     asm.append("1:    LDA  5,0(6)\n");
@@ -55,9 +82,17 @@ abstract public class Asm {
     address += 11;
   }
 
-  static public void generateAssembly(String filename) {
+  /* default assembly code tail */
+  private void end() {
+    asm.append("* End of execution:\n");
+    asm.append(address + ":     HALT  0,0,0\n");
+  }
+
+  /* generate assembly code and output to file */
+  public void generateAssembly(String filename) {
     header(filename);
     prelude();
+    end();
 
     /* output file name with path and .tm file type */
     String write = filename.substring(0, filename.lastIndexOf('.')) + ".tm";
