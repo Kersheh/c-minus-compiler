@@ -22,7 +22,7 @@ public class Asm {
     String line;
     while(scanner.hasNextLine()) {
       line = scanner.nextLine();
-      intermToAsm(line);
+      //utilize line
     }
     scanner.close();
   }
@@ -46,12 +46,6 @@ public class Asm {
     else {
       asm.append(addr + ":  " + r + "," + s + "(" + t + ")" + "\n");
     }
-  }
-
-  /* convert intermediate code line to assembly code */
-  private void intermToAsm(String line) {
-    //
-    address += 1;
   }
 
   /* default assembly code header */
