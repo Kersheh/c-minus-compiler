@@ -38,11 +38,11 @@ public class SymbolFunction extends Symbol {
     this.parameters.add(s);
   }
 
-  public List<SymbolInt> getLocalDecalartions(){
+  public List<SymbolInt> getLocalDeclarations(){
     return this.parameters;
   }
 
-  public void addLocalDecalartion(SymbolInt s){
+  public void addLocalDeclaration(SymbolInt s){
     if (this.localDeclarations == null) {
       this.localDeclarations = new ArrayList<>();
     }
