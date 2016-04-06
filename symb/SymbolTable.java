@@ -13,23 +13,15 @@ public class SymbolTable {
 
   private Deque<HashMap<List<String>, Symbol>> tableStack = new ArrayDeque<>();
   private final static int SPACES = 4;
-  private static SymbolTable instance = null;
   private SymbolFunction currentFunction;
 
-  private SymbolTable() {
+  public SymbolTable() {
     tableStack.push(new LinkedHashMap<>());
     SymbolFunction input = new SymbolFunction("input", 0, TypeSpec.INT);
     SymbolFunction output = new SymbolFunction("output", 0, TypeSpec.VOID);
     output.addParameter(new SymbolInt("x", 0));
     this.addSymbol(input);
     this.addSymbol(output);
-  }
-
-  public static SymbolTable getInstance(){
-    if (SymbolTable.instance == null){
-      SymbolTable.instance = new SymbolTable();
-    }
-    return SymbolTable.instance;
   }
 
   public void newScope(){

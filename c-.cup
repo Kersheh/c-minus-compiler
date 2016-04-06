@@ -102,12 +102,12 @@ precedence left ELSE;
                         // print symbol tables
                         if("-s".equals(arg)) {
                           System.out.println("The symbol table is:");
-                          SymbolTable.getInstance().showTable(RESULT, 0);
+                          new SymbolTable().showTable(RESULT, 0);
                         }
                         // compile c- to assembly
                         if("-c".equals(arg)) {
                           System.out.println("Compiling to assembly...");
-                          Asm.generateAssembly(this.parser.filename);
+                          new Asm().generateAssembly(this.parser.filename);
                         }
                       }
                     }
