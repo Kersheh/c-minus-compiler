@@ -1,0 +1,13 @@
+/*
+  Created by: Matt Breckon and Dean Way
+  File name: 0.cm
+  Generic testing file for editing.
+*/
+
+void foo(void) {
+
+}
+
+void main(void) {
+  foo();
+}
