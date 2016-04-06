@@ -16,6 +16,8 @@ public class SymbolTable {
   private SymbolFunction currentFunction;
   private Deque<Integer> temps = new ArrayDeque<>();
 
+  private boolean error = false;
+
   public SymbolTable() {
     this.newScope();
     SymbolFunction input = new SymbolFunction("input", 0, TypeSpec.INT);
@@ -96,7 +98,7 @@ public class SymbolTable {
     }
   }
 
-  private boolean haveMatchingParameters(SymbolFunction decl, SymbolFunction use){
+  public boolean haveMatchingParameters(SymbolFunction decl, SymbolFunction use){
     if(decl.getParameters() == null  && use.getParameters() == null){
       return true;
     }
@@ -117,6 +119,27 @@ public class SymbolTable {
       }
     }
     return true;
+  }
+
+  public void checkType(ExpCall call){
+      Symbol s = new SymbolFunction(call.id, 0, TypeSpec.INT);
+      try {
+        SymbolFunction match = (SymbolFunction) this.getMatchingSymbol(s);
+        if (TypeSpec.VOID.equals(match.getReturnType())){
+          this.error(match.getId() + " of type VOID used in expression requiring type INT on line " + (call.pos + 1));
+        }
+      } catch (Exception e) {
+        //Do nothing
+      }
+  } 
+
+  public void error(String message){
+    System.err.println("Error: " + message);
+    this.error = true;
+  }
+
+  public SymbolFunction getCurrentFunction(){
+    return this.currentFunction;
   }
 
   static private void indent(int spaces) {
