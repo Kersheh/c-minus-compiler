@@ -18,17 +18,6 @@ public class Asm {
   static private final int AC = 0;
   static private final int AC1 = 1;
 
-  /* parse intermediate code and call conversion to assembly code */
-  public void parseInterm() {
-    Scanner scanner = new Scanner(this.input);
-    String line;
-    while(scanner.hasNextLine()) {
-      line = scanner.nextLine();
-      //utilize line
-    }
-    scanner.close();
-  }
-
   private enum Operations {
     HALT, IN, OUT, ADD, SUB, MUL, DIV, LD, ST,
     LDA, LDC, JLT, JLE, JGT, JGE, JEQ, JNE;
