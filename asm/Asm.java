@@ -30,13 +30,17 @@ public class Asm {
   );
 
   /* add assembly line to output StringBuilder */
-  private void addLine(int addr, Operations oper, int r, int s, int t) {
+  private void addLine(int address,  Operations oper, int r, int s, int t) {
     if(registerOnly.contains(oper)) {
-      asm.append(addr + ":  " + r + "," + s + "," + t + "\n");
+      asm.append(address + ":  " + oper.name() + " " + r + "," + s + "," + t + "\n");
     }
     else {
-      asm.append(addr + ":  " + r + "," + s + "(" + t + ")" + "\n");
+      asm.append(address + ":  " + oper.name() + " " + r + "," + s + "(" + t + ")" + "\n");
     }
+  }
+
+  private void emitComment(String s) {
+    asm.append("* " + s + "\n");
   }
 
   /* default assembly code header */
@@ -64,19 +68,20 @@ public class Asm {
     asm.append("10:    LD  7,-1(5)\n");
     asm.append("3:    LDA  7,7(7)\n");
     asm.append("* End of standard prelude.\n");
-    address += 11;
+    address += 10;
   }
 
   /* default assembly code tail */
   private void end() {
     asm.append("* End of execution:\n");
-    asm.append(address + ":     HALT  0,0,0\n");
+    asm.append(++address + ":     HALT  0,0,0\n");
   }
 
   /* generate assembly code and output to file */
-  public void generateAssembly(String filename) {
+  public void generateAssembly(String filename, DeclarList tree) {
     header(filename);
     prelude();
+    this.genCode(tree);
     end();
 
     /* output file name with path and .tm file type */
@@ -180,14 +185,21 @@ public class Asm {
   }
 
   private void genCode(DeclarFun tree) {
-    System.out.println("Local scope at " + tree.name +  ":");
-    Symbol s = new SymbolFunction(tree.name, 0, tree.type.type);
+    Symbol s = new SymbolFunction(tree.name, tree.type.type);
     if(!this.symbolTable.addSymbol(s)){
       this.symbolTable.error("Function redefinition error");
     }
     this.symbolTable.newScope();
+    this.symbolTable.addSymbol(new SymbolInt("_ofp"));
+    this.symbolTable.addSymbol(new SymbolInt("_ret"));
+    this.address++;
+    int jmpAround = this.address;
+    this.address++;
+    this.emitComment("processing function: " + tree.name);
+    this.addLine(this.address, Operations.ST, 0, -1, 5);
     genCode(tree.params);
     genCode(tree.stmt);
+    this.addLine(jmpAround, Operations.LDA, 7, this.address - jmpAround, 7);
     this.symbolTable.leaveScope();
   }
 

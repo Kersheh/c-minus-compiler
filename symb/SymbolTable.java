@@ -39,7 +39,7 @@ public class SymbolTable {
       return;
     }
     this.tableStack.pop();
-    this.currentOffset -= this.temps.pop();
+    this.currentOffset += this.temps.pop();
   }
 
   public int newTemp(){
@@ -55,6 +55,7 @@ public class SymbolTable {
     }
     if(Symbol.FUNC_TYPE.equals(symb.getType())) {
       this.currentFunction = (SymbolFunction)symb;
+      this.currentOffset = 0;
     }
     List<String> key = Arrays.asList(symb.getId(), symb.getType());
     HashMap<List<String>, Symbol> top = this.tableStack.peek();
@@ -62,7 +63,12 @@ public class SymbolTable {
       throw new RuntimeException();
     }
     if(top.get(key) == null){
+      if(!inGlobalScope() && !inFunctionOuterScope()){
+        this.temps.push(0);
+      }
+      symb.setAddress(this.currentOffset);
       top.put(key, symb);
+      this.currentOffset--;
     } else {
       return false;
     }
@@ -138,6 +144,10 @@ public class SymbolTable {
 
   public boolean inGlobalScope(){
     return this.tableStack.size() == 1;
+  }
+
+  public boolean inFunctionOuterScope(){
+    return this.tableStack.size() == 2;
   }
 
   public int getCurrentOffset(){
