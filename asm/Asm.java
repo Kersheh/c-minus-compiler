@@ -287,8 +287,10 @@ public class Asm {
     int jmpAround = this.address;
     genCode(tree.then_stmt);
     this.emitCode(jmpAround, Operations.JEQ, AC, this.address + 1 - jmpAround, PC, "if: jmp to else");
+    jmpAround = ++this.address;
     if (tree.else_stmt != null)
       genCode(tree.else_stmt);
+      this.emitCode(jmpAround, Operations.LDA, PC, this.address - jmpAround, PC, "if: jmp to end of else");
   }
 
   private void genCode(StmtWhile tree) {

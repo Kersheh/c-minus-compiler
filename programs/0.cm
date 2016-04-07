@@ -14,10 +14,8 @@ void bar(void){
     int x;
     x = 5;
     r = 25;
-    output(r);
-    s = 4;
-    if (r < 25) {
-        output(s);
+    if (r <= 25) {
+        output(x);
     } else {
         output(r);
     }
