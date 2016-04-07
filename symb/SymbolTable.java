@@ -167,7 +167,7 @@ public class SymbolTable {
   public int getGlobalOffset(){
     return this.globalOffset;
   }
-  
+
 
   public void error(String message){
     System.err.println("Error: " + message);

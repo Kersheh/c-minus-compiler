@@ -86,8 +86,10 @@ public class Asm {
       this.emitCode(++this.address, Operations.LDA, PC, match.getAddress() - this.address - 1, PC, "jump to " + match.getId() + " loc");
       this.emitCode(++this.address, Operations.LD, FP, 0, FP, "pop frame");
     }
-    catch(Exception e) {
+    catch(UndeclaredException e) {
       this.symbolTable.error("Missing declaration of main function");
+    } catch (Exception e) {
+
     }
     asm.append("* End of execution:\n");
     asm.append(String.format("%1$3s", Integer.toString(++address)));
@@ -131,7 +133,7 @@ public class Asm {
     }
   }
 
-  public void genCode(ExpList tree, SymbolFunction func) {
+  public void genCode(ExpList tree, SymbolFunction func, int offset) {
     while(tree != null) {
       if(tree.head instanceof ExpVar){
         ExpVar var = (ExpVar) tree.head;
@@ -144,16 +146,18 @@ public class Asm {
             match = this.symbolTable.getMatchingSymbol(s);
           } catch (InvalidTypeException e) {
             s = new SymbolInt(var.name, 0);
-          } catch (Exception e){
-            //Do nothing
+          } catch (Exception e) {
+            this.symbolTable.error("Invaild type for argument on line: " + tree.head.pos);
           }
           func.addParameter(s);
         }
+        genCode(var, offset);
       } else {
         func.addParameter(new SymbolInt("arg", 0));
+        genCode(tree.head);
       }
-      genCode(tree.head);
       tree = tree.tail;
+      offset--;
     }
   }
 
@@ -201,7 +205,7 @@ public class Asm {
     int jmpAround = this.address;
     Symbol s = new SymbolFunction(tree.name, ++this.address, tree.type.type);
     if(!this.symbolTable.addSymbol(s)){
-      this.symbolTable.error("Function redefinition error");
+      this.symbolTable.error("Function redefinition error of function " + tree.name + " on line: " + tree.pos);
     }
     this.symbolTable.newScope();
     this.symbolTable.addSymbol(new SymbolInt("_ofp"));
@@ -315,11 +319,11 @@ public class Asm {
     else if(tree instanceof ExpOp)
       genCode((ExpOp)tree);
     else if(tree instanceof ExpVar)
-      genCode((ExpVar)tree);
+      genCode((ExpVar)tree, true);
   }
 
   private void genCode(ExpAssign tree) {
-    SymbolInt assign = genCode(tree.lhs);
+    SymbolInt assign = genCode(tree.lhs, false);
     if(tree.rhs instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.rhs);
     }
@@ -335,7 +339,7 @@ public class Asm {
     try {
       match = (SymbolFunction) this.symbolTable.getMatchingSymbol(s);
       if (tree.args != null) {
-        genCode(tree.args, s);
+        genCode(tree.args, s, symbolTable.getCurrentOffset() - 2);
       }
       if (!this.symbolTable.haveMatchingParameters(match, s)) {
         this.symbolTable.error("arguments in function call to " + match.getId() + " on line "
@@ -353,17 +357,18 @@ public class Asm {
     }
   }
 
-  private SymbolInt genCode(ExpVar tree) {
+  private SymbolInt genCode(ExpVar tree, boolean value) {
     SymbolInt temp = null;
+    Operations load = value ? Operations.LD : Operations.LDA;
     if(tree.exp == null) { //normal variable
       Symbol s = new SymbolInt(tree.name);
       try {
         Symbol match = this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
         if (match.isGlobalVar()){
-          this.emitCode(++this.address, Operations.LDA, AC, match.getAddress(), GP, "load id value");
+          this.emitCode(++this.address, load, AC, match.getAddress(), GP, "load id value");
         } else {
-          this.emitCode(++this.address, Operations.LDA, AC, match.getAddress(), FP, "load id value");
+          this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id value");
         }
         temp = this.symbolTable.newTemp();
         this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
@@ -379,9 +384,49 @@ public class Asm {
       try {
         SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
-        this.emitCode(++this.address, Operations.LDA, AC, match.getAddress(), FP, "load id value");
+        this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id value");
         temp = this.symbolTable.newTempArray(match.getSize());
         this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
+      }
+      catch(Exception e) {
+        this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
+      }
+
+      if(tree.exp instanceof ExpCall){
+        this.symbolTable.checkType((ExpCall)tree.exp);
+      }
+      genCode(tree.exp);
+    }
+    return temp;
+  }
+
+  private SymbolInt genCode(ExpVar tree, int offset) {
+    SymbolInt temp = null;
+    if(tree.exp == null) { //normal variable
+      Symbol s = new SymbolInt(tree.name);
+      try {
+        Symbol match = this.symbolTable.getMatchingSymbol(s);
+        this.emitComment("Looking up id: " + tree.name);
+        if (match.isGlobalVar()){
+          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), GP, "load id value");
+        } else {
+          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id value");
+        }
+        this.emitCode(++this.address, Operations.ST, AC, offset, FP, "push left");
+      }
+      catch(InvalidTypeException e) {
+        //Do nothing. Arrays can be used without brackets in some cases
+        //i.e. int foo(int arr[]) ...  int a[10]; foo(a);
+      } catch (Exception e){
+        this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
+      }
+    } else { //array variable
+      Symbol s = new SymbolArray(tree.name);
+      try {
+        SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
+        this.emitComment("Looking up id: " + tree.name);
+        this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id value");
+        this.emitCode(++this.address, Operations.ST, AC, offset, FP, "push left");
       }
       catch(Exception e) {
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
@@ -402,6 +447,43 @@ public class Asm {
     genCode(tree.left);
     if (tree.right instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.right);
+    }
+    genCode(tree.right);
+
+    genCode(tree.left);
+    switch(tree.op) {
+      case ExpOp.PLUS:
+        System.out.println(" + ");
+        break;
+      case ExpOp.MINUS:
+        System.out.println(" - ");
+        break;
+      case ExpOp.TIMES:
+        System.out.println(" * ");
+        break;
+      case ExpOp.OVER:
+        System.out.println(" / ");
+        break;
+      case ExpOp.LT:
+        System.out.println(" < ");
+        break;
+      case ExpOp.LTEQ:
+        System.out.println(" <= ");
+        break;
+      case ExpOp.GT:
+        System.out.println(" > ");
+        break;
+      case ExpOp.GTEQ:
+        System.out.println(" >= ");
+        break;
+      case ExpOp.EQ:
+        System.out.println(" == ");
+        break;
+      case ExpOp.NOTEQ:
+        System.out.println(" != ");
+        break;
+      default:
+        System.out.println("Unrecognized operator at line " + (tree.pos + 1));
     }
     genCode(tree.right);
   }
