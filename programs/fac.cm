@@ -1,0 +1,20 @@
+/*
+  Source: Fei Song's TMSimulator
+  File name: fac.cm
+  A program that calculates the factorial of x.
+  -- This program compiles without errors.
+*/
+
+void main(void) {
+  int x; int fac;
+
+  x = input();
+  fac = 1;
+
+  while (x > 1) {
+    fac = fac * x;
+    x = x - 1;
+  } 
+
+  output(fac);
+}
