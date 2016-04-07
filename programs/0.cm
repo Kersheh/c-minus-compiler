@@ -6,11 +6,21 @@
 int r;
 int s;
 
+int foo(void){
+    return 5;
+}
+
 void bar(void){
+    int x;
+    x = 5;
     r = 25;
     output(r);
-    s = 56;
-    output(s);
+    s = 4;
+    if (r < 25) {
+        output(s);
+    } else {
+        output(r);
+    }
 }
 
 void main(void) {

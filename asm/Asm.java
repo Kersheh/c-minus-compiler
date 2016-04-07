@@ -283,7 +283,10 @@ public class Asm {
       this.symbolTable.checkType((ExpCall)tree.test);
     }
     genCode(tree.test);
+    this.address++;
+    int jmpAround = this.address;
     genCode(tree.then_stmt);
+    this.emitCode(jmpAround, Operations.JEQ, AC, this.address + 1 - jmpAround, PC, "if: jmp to else");
     if (tree.else_stmt != null)
       genCode(tree.else_stmt);
   }
@@ -323,14 +326,15 @@ public class Asm {
   }
 
   private void genCode(ExpAssign tree) {
-    SymbolInt assign = genCode(tree.lhs, false);
+    SymbolInt temp = this.symbolTable.newTemp();
+    genCode(tree.lhs, false);
+    this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
     if(tree.rhs instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.rhs);
     }
     genCode(tree.rhs);
-    this.emitCode(++this.address, Operations.LD, AC1, assign.getAddress(), FP);
+    this.emitCode(++this.address, Operations.LD, AC1, temp.getAddress(), FP);
     this.emitCode(++this.address, Operations.ST, AC, 0, AC1, "assign: store value");
-
   }
 
   private void genCode(ExpCall tree) {
@@ -357,8 +361,7 @@ public class Asm {
     }
   }
 
-  private SymbolInt genCode(ExpVar tree, boolean value) {
-    SymbolInt temp = null;
+  private void genCode(ExpVar tree, boolean value) {
     Operations load = value ? Operations.LD : Operations.LDA;
     if(tree.exp == null) { //normal variable
       Symbol s = new SymbolInt(tree.name);
@@ -366,12 +369,10 @@ public class Asm {
         Symbol match = this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
         if (match.isGlobalVar()){
-          this.emitCode(++this.address, load, AC, match.getAddress(), GP, "load id value");
+          this.emitCode(++this.address, load, AC, match.getAddress(), GP, "load id");
         } else {
-          this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id value");
+          this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id");
         }
-        temp = this.symbolTable.newTemp();
-        this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
       }
       catch(InvalidTypeException e) {
         //Do nothing. Arrays can be used without brackets in some cases
@@ -384,9 +385,7 @@ public class Asm {
       try {
         SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
-        this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id value");
-        temp = this.symbolTable.newTempArray(match.getSize());
-        this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
+        this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id");
       }
       catch(Exception e) {
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
@@ -397,10 +396,9 @@ public class Asm {
       }
       genCode(tree.exp);
     }
-    return temp;
   }
 
-  private SymbolInt genCode(ExpVar tree, int offset) {
+  private void genCode(ExpVar tree, int offset) {
     SymbolInt temp = null;
     if(tree.exp == null) { //normal variable
       Symbol s = new SymbolInt(tree.name);
@@ -408,9 +406,9 @@ public class Asm {
         Symbol match = this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
         if (match.isGlobalVar()){
-          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), GP, "load id value");
+          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), GP, "load id");
         } else {
-          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id value");
+          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id");
         }
         this.emitCode(++this.address, Operations.ST, AC, offset, FP, "push left");
       }
@@ -425,7 +423,7 @@ public class Asm {
       try {
         SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
-        this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id value");
+        this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id");
         this.emitCode(++this.address, Operations.ST, AC, offset, FP, "push left");
       }
       catch(Exception e) {
@@ -437,55 +435,79 @@ public class Asm {
       }
       genCode(tree.exp);
     }
-    return temp;
   }
 
   private void genCode(ExpOp tree) {
+    SymbolInt temp;
     if (tree.left instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.left);
     }
     genCode(tree.left);
+    temp = this.symbolTable.newTemp();
+    this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
     if (tree.right instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.right);
     }
     genCode(tree.right);
-
-    genCode(tree.left);
+    this.emitCode(++this.address, Operations.LD, AC1, temp.getAddress(), FP, "load left");
     switch(tree.op) {
       case ExpOp.PLUS:
-        System.out.println(" + ");
+        this.emitCode(++this.address, Operations.ADD, AC, AC1, AC);
         break;
       case ExpOp.MINUS:
-        System.out.println(" - ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
         break;
       case ExpOp.TIMES:
-        System.out.println(" * ");
+        this.emitCode(++this.address, Operations.MUL, AC, AC1, AC);
         break;
       case ExpOp.OVER:
-        System.out.println(" / ");
+        this.emitCode(++this.address, Operations.DIV, AC, AC1, AC);
         break;
       case ExpOp.LT:
-        System.out.println(" < ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
+        this.emitCode(++this.address, Operations.JLT, AC, 2, PC, "br if true");
+        this.emitCode(++this.address, Operations.LDC, AC, 0, 0, "false case");
+        this.emitCode(++this.address, Operations.LDA, PC, 1, PC, "unconditional jump");
+        this.emitCode(++this.address, Operations.LDC, AC, 1, 0, "true case");
         break;
       case ExpOp.LTEQ:
-        System.out.println(" <= ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
+        this.emitCode(++this.address, Operations.JLE, AC, 2, PC, "br if true");
+        this.emitCode(++this.address, Operations.LDC, AC, 0, 0, "false case");
+        this.emitCode(++this.address, Operations.LDA, PC, 1, PC, "unconditional jump");
+        this.emitCode(++this.address, Operations.LDC, AC, 1, 0, "true case");
         break;
       case ExpOp.GT:
-        System.out.println(" > ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
+        this.emitCode(++this.address, Operations.JGT, AC, 2, PC, "br if true");
+        this.emitCode(++this.address, Operations.LDC, AC, 0, 0, "false case");
+        this.emitCode(++this.address, Operations.LDA, PC, 1, PC, "unconditional jump");
+        this.emitCode(++this.address, Operations.LDC, AC, 1, 0, "true case");
         break;
       case ExpOp.GTEQ:
-        System.out.println(" >= ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
+        this.emitCode(++this.address, Operations.JGE, AC, 2, PC, "br if true");
+        this.emitCode(++this.address, Operations.LDC, AC, 0, 0, "false case");
+        this.emitCode(++this.address, Operations.LDA, PC, 1, PC, "unconditional jump");
+        this.emitCode(++this.address, Operations.LDC, AC, 1, 0, "true case");
         break;
       case ExpOp.EQ:
-        System.out.println(" == ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
+        this.emitCode(++this.address, Operations.JEQ, AC, 2, PC, "br if true");
+        this.emitCode(++this.address, Operations.LDC, AC, 0, 0, "false case");
+        this.emitCode(++this.address, Operations.LDA, PC, 1, PC, "unconditional jump");
+        this.emitCode(++this.address, Operations.LDC, AC, 1, 0, "true case");
         break;
       case ExpOp.NOTEQ:
-        System.out.println(" != ");
+        this.emitCode(++this.address, Operations.SUB, AC, AC1, AC);
+        this.emitCode(++this.address, Operations.JNE, AC, 2, PC, "br if true");
+        this.emitCode(++this.address, Operations.LDC, AC, 0, 0, "false case");
+        this.emitCode(++this.address, Operations.LDA, PC, 1, PC, "unconditional jump");
+        this.emitCode(++this.address, Operations.LDC, AC, 1, 0, "true case");
         break;
       default:
         System.out.println("Unrecognized operator at line " + (tree.pos + 1));
     }
-    genCode(tree.right);
   }
 
   private void genCode(ExpConst tree) {
