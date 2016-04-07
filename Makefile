@@ -12,7 +12,7 @@ FILES = $(wildcard $(DIRS:=/*.cm))
 
 all: Cminus.class
 
-Cminus.class: asm/*.java symb/*.java symb/exceptions/*.java absyn/*.java parser.java sym.java Lexer.java Cminus.java
+Cminus.class: asm/*.java asm/exceptions/*.java symb/*.java symb/exceptions/*.java absyn/*.java parser.java sym.java Lexer.java Cminus.java
 
 %.class: %.java
 	$(JAVAC) $(CLASSPATH)  $^
@@ -45,7 +45,7 @@ test_table:
 	done
 
 clean:
-	rm -f parser.java Lexer.java sym.java *.class absyn/*.class symb/*.class symb/exceptions/*.class asm/*.class programs/*.tm  *~
+	rm -f parser.java Lexer.java sym.java *.class absyn/*.class symb/*.class symb/exceptions/*.class asm/*.class asm/exceptions/*.class programs/*.tm  *~
 
 clean_test:
 	rm programs/*.tm
