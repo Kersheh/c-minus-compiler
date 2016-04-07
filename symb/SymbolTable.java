@@ -14,16 +14,18 @@ public class SymbolTable {
   private Deque<HashMap<List<String>, Symbol>> tableStack = new ArrayDeque<>();
   private final static int SPACES = 4;
   private SymbolFunction currentFunction;
-  private Deque<Integer> temps = new ArrayDeque<>();
+  private int temp = 0;
 
   private boolean error = false;
 
   private int currentOffset = 0;
 
+  private int globalOffset = 0;
+
   public SymbolTable() {
     this.newScope();
-    SymbolFunction input = new SymbolFunction("input", 0, TypeSpec.INT);
-    SymbolFunction output = new SymbolFunction("output", 0, TypeSpec.VOID);
+    SymbolFunction input = new SymbolFunction("input", 4, TypeSpec.INT);
+    SymbolFunction output = new SymbolFunction("output", 7, TypeSpec.VOID);
     output.addParameter(new SymbolInt("x", 0));
     this.addSymbol(input);
     this.addSymbol(output);
@@ -31,22 +33,26 @@ public class SymbolTable {
 
   public void newScope(){
     this.tableStack.push(new LinkedHashMap<>());
-    this.temps.push(0);
   }
 
   public void leaveScope(){
     if(this.tableStack.size() <= 1){
       return;
     }
+    this.currentOffset += this.tableStack.peek().size();
     this.tableStack.pop();
-    this.currentOffset += this.temps.pop();
   }
 
-  public int newTemp(){
-    int top = this.temps.pop();
-    top++;
-    this.temps.push(top);
-    return top;
+  public SymbolInt newTemp(){
+    SymbolInt symb = new SymbolInt( "_t" + ++temp);
+    this.addSymbol(symb);
+    return symb;
+  }
+
+  public SymbolArray newTempArray(int size){
+    SymbolArray symb = new SymbolArray( "_t" + ++temp, size);
+    this.addSymbol(symb);
+    return symb;
   }
 
   public boolean addSymbol(Symbol symb) {
@@ -63,12 +69,16 @@ public class SymbolTable {
       throw new RuntimeException();
     }
     if(top.get(key) == null){
-      if(!inGlobalScope() && !inFunctionOuterScope()){
-        this.temps.push(0);
+      symb.setScope(this.tableStack.size());
+      if (symb.isGlobalVar()){
+        symb.setAddress(this.globalOffset);
+        this.globalOffset--;
+      } else if(!Symbol.FUNC_TYPE.equals(symb.getType())) {
+        symb.setAddress(this.currentOffset);
       }
-      symb.setAddress(this.currentOffset);
       top.put(key, symb);
-      this.currentOffset--;
+      if (!Symbol.FUNC_TYPE.equals(symb.getType()))
+        this.currentOffset--;
     } else {
       return false;
     }
@@ -153,6 +163,11 @@ public class SymbolTable {
   public int getCurrentOffset(){
     return this.currentOffset;
   }
+
+  public int getGlobalOffset(){
+    return this.globalOffset;
+  }
+  
 
   public void error(String message){
     System.err.println("Error: " + message);

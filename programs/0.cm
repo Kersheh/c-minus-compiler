@@ -3,11 +3,16 @@
   File name: 0.cm
   Generic testing file for editing.
 */
+int r;
+int s;
 
-void foo(void) {
-
+void bar(void){
+    r = 25;
+    output(r);
+    s = 56;
+    output(s);
 }
 
 void main(void) {
-  foo();
+  bar();
 }

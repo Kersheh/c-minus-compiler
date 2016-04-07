@@ -11,7 +11,6 @@ public class Asm {
   private StringBuilder asm = new StringBuilder(); //string output to .tm file
   private SymbolTable symbolTable = new SymbolTable();  
   private int address = 0;
-  private int pc = 0;
   static private final int PC = 7;
   static private final int GP = 6;
   static private final int FP = 5;
@@ -26,17 +25,23 @@ public class Asm {
   private List<Operations> registerOnly = Arrays.asList(
     Operations.HALT, Operations.IN, Operations.OUT, 
     Operations.ADD, Operations.SUB, Operations.MUL, 
-    Operations.DIV, Operations.LDC
+    Operations.DIV
   );
 
   /* add assembly line to output StringBuilder */
-  private void addLine(int address,  Operations oper, int r, int s, int t) {
+  private void emitCode(int address, Operations oper, int r, int s, int t, String comment) {
+    String addr = String.format("%1$3s", Integer.toString(address));
+    String op = String.format("%1$6s", oper.name());
     if(registerOnly.contains(oper)) {
-      asm.append(address + ":  " + oper.name() + " " + r + "," + s + "," + t + "\n");
+      asm.append(addr + ": " + op + "  " + r + "," + s + "," + t + " \t" + comment + "\n");
     }
     else {
-      asm.append(address + ":  " + oper.name() + " " + r + "," + s + "(" + t + ")" + "\n");
+      asm.append(addr + ": " + op + "  " + r + "," + s + "(" + t + ")" + " \t"  +  comment + "\n");
     }
+  }
+
+  private void emitCode(int address, Operations oper, int r, int s, int t) {
+    this.emitCode(address, oper, r, s, t, "");
   }
 
   private void emitComment(String s) {
@@ -53,28 +58,40 @@ public class Asm {
   /* default assembly code prelude - input and ouput */
   private void prelude() {
     asm.append("* Standard prelude:\n");
-    asm.append("0:     LD  6,0(0)\n");
-    asm.append("1:    LDA  5,0(6)\n");
-    asm.append("2:     ST  0,0(0)\n");
+    asm.append("  0:     LD  6,0(0) \t\n");
+    asm.append("  1:    LDA  5,0(6) \t\n");
+    asm.append("  2:     ST  0,0(0) \t\n");
     asm.append("* Jump around i/o routines here\n");
     asm.append("* code for input routine\n");
-    asm.append("4:     ST  0,-1(5)\n");
-    asm.append("5:     IN  0,0,0\n");
-    asm.append("6:     LD  7,-1(5)\n");
-    asm.append("* code for input routine\n");
-    asm.append("7:     ST  0,-1(5)\n");
-    asm.append("8:     LD  0,-2(5)\n");
-    asm.append("9:    OUT  0,0,0\n");
-    asm.append("10:    LD  7,-1(5)\n");
-    asm.append("3:    LDA  7,7(7)\n");
+    asm.append("  4:     ST  0,-1(5) \t\n");
+    asm.append("  5:     IN  0,0,0 \t\n");
+    asm.append("  6:     LD  7,-1(5) \t\n");
+    asm.append("* code for output routine\n");
+    asm.append("  7:     ST  0,-1(5) \t\n");
+    asm.append("  8:     LD  0,-2(5) \t\n");
+    asm.append("  9:    OUT  0,0,0 \t\n");
+    asm.append(" 10:     LD  7,-1(5) \t\n");
+    asm.append("  3:    LDA  7,7(7) \t\n");
     asm.append("* End of standard prelude.\n");
     address += 10;
   }
 
   /* default assembly code tail */
   private void end() {
+    try {
+      SymbolFunction match = (SymbolFunction) this.symbolTable.getMatchingSymbol(new SymbolFunction("main", null));
+      this.emitCode(++this.address, Operations.ST, FP, symbolTable.getGlobalOffset(), FP, "push ofp");
+      this.emitCode(++this.address, Operations.LDA, FP, symbolTable.getGlobalOffset(), FP, "push frame");
+      this.emitCode(++this.address, Operations.LDA, AC, 1, PC, "load ac with ret ptr");
+      this.emitCode(++this.address, Operations.LDA, PC, match.getAddress() - this.address - 1, PC, "jump to " + match.getId() + " loc");
+      this.emitCode(++this.address, Operations.LD, FP, 0, FP, "pop frame");
+    }
+    catch(Exception e) {
+      this.symbolTable.error("Missing declaration of main function");
+    }
     asm.append("* End of execution:\n");
-    asm.append(++address + ":     HALT  0,0,0\n");
+    asm.append(String.format("%1$3s", Integer.toString(++address)));
+    asm.append(":   HALT  0,0,0 \t\n");
   }
 
   /* generate assembly code and output to file */
@@ -89,9 +106,6 @@ public class Asm {
     /* export assembly to external file */
     try {
       File file = new File(write);
-      if(!file.exists()) 
-        file.createNewFile();
-
       FileWriter fw = new FileWriter(file.getAbsoluteFile());
       BufferedWriter bw = new BufferedWriter(fw);
       bw.write(asm.toString());
@@ -111,6 +125,7 @@ public class Asm {
 
   public void genCode(DeclarListLocal tree) {
     while(tree != null) {
+      this.emitComment("allocating local var: " + tree.head.name);
       genCode(tree.head);
       tree = tree.tail;
     }
@@ -161,9 +176,6 @@ public class Asm {
       genCode((DeclarVar)tree);
     else if(tree instanceof DeclarFun)
       genCode((DeclarFun)tree);
-    else {
-      //do nothing ¯\_(ツ)_/¯
-    }
   }
 
   private void genCode(DeclarVar tree) {
@@ -185,21 +197,22 @@ public class Asm {
   }
 
   private void genCode(DeclarFun tree) {
-    Symbol s = new SymbolFunction(tree.name, tree.type.type);
+    this.address++;
+    int jmpAround = this.address;
+    Symbol s = new SymbolFunction(tree.name, ++this.address, tree.type.type);
     if(!this.symbolTable.addSymbol(s)){
       this.symbolTable.error("Function redefinition error");
     }
     this.symbolTable.newScope();
     this.symbolTable.addSymbol(new SymbolInt("_ofp"));
     this.symbolTable.addSymbol(new SymbolInt("_ret"));
-    this.address++;
-    int jmpAround = this.address;
-    this.address++;
+
     this.emitComment("processing function: " + tree.name);
-    this.addLine(this.address, Operations.ST, 0, -1, 5);
+    this.emitCode(this.address, Operations.ST, 0, -1, 5);
     genCode(tree.params);
     genCode(tree.stmt);
-    this.addLine(jmpAround, Operations.LDA, 7, this.address - jmpAround, 7);
+    this.emitCode(++this.address, Operations.LD, PC, -1, FP);
+    this.emitCode(jmpAround, Operations.LDA, PC, this.address - jmpAround, PC, "jump around " + tree.name + " body");
     this.symbolTable.leaveScope();
   }
 
@@ -210,8 +223,9 @@ public class Asm {
   }
 
   private void genCode(Param tree) {
+    this.emitComment("allocating parameter: " + tree.id);
     if (tree.array) {
-      SymbolArray s = new SymbolArray(tree.id, 0);
+      SymbolArray s = new SymbolArray(tree.id);
       if(!this.symbolTable.addSymbol(s)){
         this.symbolTable.error("Parameter redefinition error");
       } else {
@@ -219,7 +233,7 @@ public class Asm {
       }
     }
     else {
-      SymbolInt s = new SymbolInt(tree.id, 0);
+      SymbolInt s = new SymbolInt(tree.id);
       if(!this.symbolTable.addSymbol(s)){
         this.symbolTable.error("Parameter redefinition error");
       } else {
@@ -296,6 +310,8 @@ public class Asm {
       genCode((ExpAssign)tree);
     else if(tree instanceof ExpCall)
       genCode((ExpCall)tree);
+    else if(tree instanceof ExpConst)
+      genCode((ExpConst)tree);
     else if(tree instanceof ExpOp)
       genCode((ExpOp)tree);
     else if(tree instanceof ExpVar)
@@ -303,36 +319,54 @@ public class Asm {
   }
 
   private void genCode(ExpAssign tree) {
-    genCode(tree.lhs);
+    SymbolInt assign = genCode(tree.lhs);
     if(tree.rhs instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.rhs);
     }
     genCode(tree.rhs);
+    this.emitCode(++this.address, Operations.LD, AC1, assign.getAddress(), FP);
+    this.emitCode(++this.address, Operations.ST, AC, 0, AC1, "assign: store value");
+
   }
 
   private void genCode(ExpCall tree) {
     SymbolFunction s = new SymbolFunction(tree.id, 0, null);
     SymbolFunction match = null;
     try {
-       match = (SymbolFunction) this.symbolTable.getMatchingSymbol(s);
+      match = (SymbolFunction) this.symbolTable.getMatchingSymbol(s);
+      if (tree.args != null) {
+        genCode(tree.args, s);
+      }
+      if (!this.symbolTable.haveMatchingParameters(match, s)) {
+        this.symbolTable.error("arguments in function call to " + match.getId() + " on line "
+                + tree.pos + " does not match definition");
+      }
+      this.emitComment("call to function: " + tree.id);
+      this.emitCode(++this.address, Operations.ST, FP, symbolTable.getCurrentOffset(), FP, "push ofp");
+      this.emitCode(++this.address, Operations.LDA, FP, symbolTable.getCurrentOffset(), FP, "push frame");
+      this.emitCode(++this.address, Operations.LDA, AC, 1, PC, "load ac with ret ptr");
+      this.emitCode(++this.address, Operations.LDA, PC, match.getAddress() - this.address - 1, PC, "jump to " + match.getId() + " loc");
+      this.emitCode(++this.address, Operations.LD, FP, 0, FP, "pop frame");
     }
     catch(Exception e) {
       this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
     }
-    if (tree.args != null) {
-      genCode(tree.args, s);
-    }
-    if (!this.symbolTable.haveMatchingParameters(match, s)) {
-      this.symbolTable.error("arguments in function call to " + match.getId() + " on line "
-              + tree.pos + " does not match definition");
-    }
   }
 
-  private void genCode(ExpVar tree) {
+  private SymbolInt genCode(ExpVar tree) {
+    SymbolInt temp = null;
     if(tree.exp == null) { //normal variable
-      Symbol s = new SymbolInt(tree.name, 0);
+      Symbol s = new SymbolInt(tree.name);
       try {
-        this.symbolTable.getMatchingSymbol(s);
+        Symbol match = this.symbolTable.getMatchingSymbol(s);
+        this.emitComment("Looking up id: " + tree.name);
+        if (match.isGlobalVar()){
+          this.emitCode(++this.address, Operations.LDA, AC, match.getAddress(), GP, "load id value");
+        } else {
+          this.emitCode(++this.address, Operations.LDA, AC, match.getAddress(), FP, "load id value");
+        }
+        temp = this.symbolTable.newTemp();
+        this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
       }
       catch(InvalidTypeException e) {
         //Do nothing. Arrays can be used without brackets in some cases
@@ -341,9 +375,13 @@ public class Asm {
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
       }
     } else { //array variable
-      Symbol s = new SymbolArray(tree.name, 0);
+      Symbol s = new SymbolArray(tree.name);
       try {
-        Symbol match = this.symbolTable.getMatchingSymbol(s);
+        SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
+        this.emitComment("Looking up id: " + tree.name);
+        this.emitCode(++this.address, Operations.LDA, AC, match.getAddress(), FP, "load id value");
+        temp = this.symbolTable.newTempArray(match.getSize());
+        this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "push left");
       }
       catch(Exception e) {
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
@@ -354,6 +392,7 @@ public class Asm {
       }
       genCode(tree.exp);
     }
+    return temp;
   }
 
   private void genCode(ExpOp tree) {
@@ -365,5 +404,9 @@ public class Asm {
       this.symbolTable.checkType((ExpCall)tree.right);
     }
     genCode(tree.right);
+  }
+
+  private void genCode(ExpConst tree) {
+    this.emitCode(++this.address, Operations.LDC, AC, tree.val, 0, "load constant");
   }
 }
