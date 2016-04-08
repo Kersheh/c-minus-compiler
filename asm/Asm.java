@@ -103,6 +103,9 @@ public class Asm {
     this.genCode(tree);
     end();
 
+    if(this.symbolTable.error) {
+      return;
+    }
     /* output file name with path and .tm file type */
     String write = filename.substring(0, filename.lastIndexOf('.')) + ".tm";
     /* export assembly to external file */

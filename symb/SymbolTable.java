@@ -16,7 +16,7 @@ public class SymbolTable {
   private SymbolFunction currentFunction;
   private int temp = 0;
 
-  private boolean error = false;
+  public boolean error = false;
 
   private int currentOffset = 0;
 
