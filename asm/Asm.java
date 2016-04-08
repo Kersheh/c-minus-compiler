@@ -120,6 +120,9 @@ public class Asm {
 
   public void genCode(DeclarList tree) {
     while(tree != null) {
+      if (tree.head instanceof DeclarVar){
+        this.emitComment("allocating global var: " + ((DeclarVar)tree.head).name);
+      }
       genCode(tree.head);
       tree = tree.tail;
     }
@@ -133,7 +136,8 @@ public class Asm {
     }
   }
 
-  public void genCode(ExpList tree, SymbolFunction func, int offset) {
+  public void genCode(ExpList tree, SymbolFunction func) {
+    List<Integer> argAddresses = new LinkedList<>();
     while(tree != null) {
       if(tree.head instanceof ExpVar){
         ExpVar var = (ExpVar) tree.head;
@@ -151,14 +155,26 @@ public class Asm {
           }
           func.addParameter(s);
         }
-        genCode(var, offset);
+        genCode(var);
+        SymbolInt temp = symbolTable.newTemp();
+        this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "store arg val");
+        argAddresses.add(temp.getAddress());
       } else {
         func.addParameter(new SymbolInt("arg", 0));
         genCode(tree.head);
+        SymbolInt temp = symbolTable.newTemp();
+        this.emitCode(++this.address, Operations.ST, AC, temp.getAddress(), FP, "store arg val");
+        argAddresses.add(temp.getAddress());
       }
       tree = tree.tail;
-      offset--;
     }
+    int i = 0;
+    for(Integer ad : argAddresses) {
+      this.emitCode(++this.address, Operations.LD, AC, ad, FP, "load arg val");
+      this.emitCode(++this.address, Operations.ST, AC, symbolTable.getCurrentOffset() - (2 + i), FP, "store arg val in next frame");
+      i++;
+    }
+
   }
 
   public void genCode(StmtList tree) {
@@ -312,6 +328,7 @@ public class Asm {
         this.symbolTable.error("Incorrect return type on line " + (tree.pos + 1));
       }
     }
+    this.emitCode(++this.address, Operations.LD, PC, -1, FP, "return to caller");
   }
 
   public void genCode(Exp tree) {
@@ -345,7 +362,7 @@ public class Asm {
     try {
       match = (SymbolFunction) this.symbolTable.getMatchingSymbol(s);
       if (tree.args != null) {
-        genCode(tree.args, s, symbolTable.getCurrentOffset() - 2);
+        genCode(tree.args, s);
       }
       if (!this.symbolTable.haveMatchingParameters(match, s)) {
         this.symbolTable.error("arguments in function call to " + match.getId() + " on line "
@@ -388,45 +405,6 @@ public class Asm {
         SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
         this.emitComment("Looking up id: " + tree.name);
         this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id");
-      }
-      catch(Exception e) {
-        this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
-      }
-
-      if(tree.exp instanceof ExpCall){
-        this.symbolTable.checkType((ExpCall)tree.exp);
-      }
-      genCode(tree.exp);
-    }
-  }
-
-  private void genCode(ExpVar tree, int offset) {
-    SymbolInt temp = null;
-    if(tree.exp == null) { //normal variable
-      Symbol s = new SymbolInt(tree.name);
-      try {
-        Symbol match = this.symbolTable.getMatchingSymbol(s);
-        this.emitComment("Looking up id: " + tree.name);
-        if (match.isGlobalVar()){
-          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), GP, "load id");
-        } else {
-          this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id");
-        }
-        this.emitCode(++this.address, Operations.ST, AC, offset, FP, "push left");
-      }
-      catch(InvalidTypeException e) {
-        //Do nothing. Arrays can be used without brackets in some cases
-        //i.e. int foo(int arr[]) ...  int a[10]; foo(a);
-      } catch (Exception e){
-        this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
-      }
-    } else { //array variable
-      Symbol s = new SymbolArray(tree.name);
-      try {
-        SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
-        this.emitComment("Looking up id: " + tree.name);
-        this.emitCode(++this.address, Operations.LD, AC, match.getAddress(), FP, "load id");
-        this.emitCode(++this.address, Operations.ST, AC, offset, FP, "push left");
       }
       catch(Exception e) {
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
