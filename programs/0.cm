@@ -14,8 +14,10 @@ void bar(void){
     int x;
     x = 5;
     r = 25;
-    if (r <= 25) {
-        output(x);
+    if (r == 25) {
+        int x;
+        x = 2;
+        output(foo() + x);
     } else {
         output(r);
     }

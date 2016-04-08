@@ -298,23 +298,33 @@ public class Asm {
     if (tree.test instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.test);
     }
+    this.emitComment("-> if");
     genCode(tree.test);
     this.address++;
     int jmpAround = this.address;
     genCode(tree.then_stmt);
     this.emitCode(jmpAround, Operations.JEQ, AC, this.address + 1 - jmpAround, PC, "if: jmp to else");
-    jmpAround = ++this.address;
-    if (tree.else_stmt != null)
+    if (tree.else_stmt != null) {
+      jmpAround = ++this.address;
       genCode(tree.else_stmt);
       this.emitCode(jmpAround, Operations.LDA, PC, this.address - jmpAround, PC, "if: jmp to end of else");
+    }
+    this.emitComment("<- if");
   }
 
   private void genCode(StmtWhile tree) {
     if (tree.test instanceof ExpCall){
       this.symbolTable.checkType((ExpCall)tree.test);
     }
+    this.emitComment("-> while");
+    int test = this.address;
     genCode(tree.test);
+    this.address++;
+    int jmpAround = this.address;
     genCode(tree.stmt);
+    this.emitCode(++this.address, Operations.LDA, PC, test - this.address, PC, "while: unconditional jmp to start");
+    this.emitCode(jmpAround, Operations.JEQ, AC, this.address - jmpAround, PC, "while: jmp around on false");
+    this.emitComment("<- while");
   }
 
   private void genCode(StmtReturn tree) {

@@ -8,18 +8,15 @@
   -- Error 2: main() type declaration is misspelled as "vod"
 */
 
-void printIntegers(int a[], int start, void size) {
+void printIntegers(int size) {
   int i;
-  i = start;
+  i = 0;
   while(i < size) {
-    output(a[i]);
+    output(i);
     i = i + 1;
   }
 }
 
-vod main(void) {
-  int a[3]; int i;
-  a[0] = 10; a[1] = 20; a[2] = 30;
-  i = 3;
-  print_integers(a, 0, i);
+void main(void) {
+  printIntegers(5);
 }
