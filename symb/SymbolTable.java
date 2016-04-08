@@ -73,7 +73,10 @@ public class SymbolTable {
       if (symb.isGlobalVar()){
         symb.setAddress(this.globalOffset);
         this.globalOffset--;
-      } else if(!Symbol.FUNC_TYPE.equals(symb.getType())) {
+      } else if(symb.getClass() == SymbolInt.class) {
+        symb.setAddress(this.currentOffset);
+      } else if (symb.getClass() == SymbolArray.class) {
+        this.currentOffset -= (((SymbolArray)symb).getSize()-1);
         symb.setAddress(this.currentOffset);
       }
       top.put(key, symb);

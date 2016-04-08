@@ -404,7 +404,7 @@ public class Asm {
         }
       }
       catch(InvalidTypeException e) {
-        //Do nothing. Arrays can be used without brackets in some cases
+        //Arrays can be used without brackets in some cases
         //i.e. int foo(int arr[]) ...  int a[10]; foo(a);
       } catch (Exception e){
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
@@ -413,17 +413,19 @@ public class Asm {
       Symbol s = new SymbolArray(tree.name);
       try {
         SymbolArray match = (SymbolArray)this.symbolTable.getMatchingSymbol(s);
+        if(tree.exp instanceof ExpCall){
+          this.symbolTable.checkType((ExpCall)tree.exp);
+        }
         this.emitComment("Looking up id: " + tree.name);
-        this.emitCode(++this.address, load, AC, match.getAddress(), FP, "load id");
+        this.emitComment("generating index");
+        genCode(tree.exp);
+        this.emitCode(++this.address, Operations.LD, AC1, match.getAddress(), FP, "top of array");
+        this.emitCode(++this.address, Operations.ADD, AC, AC1, AC);
+        this.emitCode(++this.address, load, AC, 0, AC, "load id");
       }
       catch(Exception e) {
         this.symbolTable.error(e.getMessage() + ": on line " + (tree.pos + 1));
       }
-
-      if(tree.exp instanceof ExpCall){
-        this.symbolTable.checkType((ExpCall)tree.exp);
-      }
-      genCode(tree.exp);
     }
   }
 
